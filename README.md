@@ -7,17 +7,19 @@
 
 ## Schedule (approximate)
 
-09:00 Welcome and introduction (dfc)
-09:30 Profiling (dfc)
-10:15 Benchmarking (dfc)
-11:00 Compiler optimisition
-12:00 Lunch
-13:30 Execution tracer (francesc)
-14:30 Memory and Garbage collection (francesc)
-15:30 
-16:00 Exercises
-16:45 Final Questions and conclusion
-17:00 Close
+| Start | Description |
+| --- | --- |
+| 09:00 | Welcome and introduction (dfc) |
+| 09:30 | Profiling (dfc) |
+| 10:15 | Benchmarking (francesc) |
+| 11:00 | Compiler optimisition (dfc)|
+| 12:00 | Lunch |
+| 13:30 | Execution tracer (francesc) |
+| 14:30 | Memory and Garbage collection (francesc) |
+| 15:30 | Tips and tricks (dfc) |
+| 16:00 | Exercises |
+| 16:45 | Final Questions and conclusion |
+| 17:00 | Close |
 
 ## Syllabus
 
