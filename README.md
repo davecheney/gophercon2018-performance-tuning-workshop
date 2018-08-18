@@ -21,10 +21,10 @@ The general theme is to start from the smallest pieces, profiling a small piece 
 
 | Start | Description |
 | --- | --- |
-| 09:00 | [Welcome and introduction][0] |
-| 09:30 | [Profiling (dfc)][1] |
+| 09:00 | [Welcome and introduction][1] |
+| 09:30 | [Profiling (dfc)][2] |
 | 10:15 | Benchmarking (francesc) |
-| 11:00 | [Compiler optimisation (dfc)][3]|
+| 11:00 | [Compiler optimisation (dfc)][4]|
 | 12:00 | Lunch |
 | 13:30 | Execution tracer (francesc) |
 | 14:30 | Memory and Garbage collection (francesc) |
@@ -40,8 +40,8 @@ This presentation is licensed under the [Creative Commons Attribution-ShareAlike
 
 You are encouraged to remix, transform, or build upon the material, providing you give appropriate credit and distribute your contributions under the same license.
 
-[0]: 1-welcome/1-welcome.md
-[1]: 2-profiling/1-profiling.md
-[3]: 4-compiler-optimisation/1-compiler-optimisation.md
+[1]: 1-welcome/1-welcome.md
+[2]: 2-profiling/1-profiling.md
+[4]: 4-compiler-optimisation/1-compiler-optimisation.md
 [6]: 6-tips-and-tricks/1-tips-and-tricks.md
 [8]: 8-conclusion/1-conclusion.md

@@ -6,7 +6,7 @@ The general theme of this workshop to start from the smallest pieces--profiling 
 
 ## Prerequisites
 
-Please prepare and bring the following with you on the day. The are several software downloads you will need. Please make sure you have them installed _before_ the workshop as we won't be able to help people install 
+Please prepare and bring the following with you on the day. The are several software downloads you will need. Please make sure you have them installed _before_ the workshop as you are large in number and we are small in number.
 
 ### Laptop, power supplies, etc.
 
@@ -14,7 +14,7 @@ The workshop material targets Go 1.10, if you have an older version of Go on you
 
 _Note_: Although there is a strong chance Go 1.11 will have shipped by Gophercon, we're sticking to Go 1.10. If you want to use Go 1.11, you'll have to do the translations in your head.
 
-Wifi will be provided. Expect it to be the usual convention center fair and make sure
+WiFi will be provided. Expect it to be the usual convention center fair and make sure you read the rest of this page _before_ you arrive.
 
 ### Graphviz
 
@@ -32,7 +32,7 @@ The section on the execution tracer requires Google Chrome. It will not work wit
 
 [https://www.google.com/chrome/]
 
-We'll be dedicating a large portion of the workshop to the execution tracer so please make sure you have Chrome installed _before_ setting off for Denver. Don't get caught short by needing to raise a ticket with your IT Helpdesk.
+We'll be dedicating a large portion of the workshop to the execution tracer so please make sure you have Chrome installed _before_ setting off for Denver. Don't get caught short by needing to raise a ticket with your IT Helpdesk on the day.
 
 ### Your own code to profile and optimise
 

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" height="500" width="640" version="1.1">
+<rect height="500" width="640" stroke="none" fill="#FFF"/>
+<line y2="48" x2="580" stroke="#666" stroke-dasharray="8,2" y1="48" x1="73"/>
+<line y2="85" x2="580" stroke="#ccc" y1="85" x1="73"/>
+<line y2="122" x2="580" stroke="#ccc" y1="122" x1="73"/>
+<line y2="159" x2="580" stroke="#ccc" y1="159" x1="73"/>
+<line y2="196" x2="580" stroke="#ccc" y1="196" x1="73"/>
+<line y2="233" x2="580" stroke="#999" stroke-dasharray="8,2" y1="233" x1="73"/>
+<line y2="270" x2="580" stroke="#ccc" y1="270" x1="73"/>
+<line y2="307" x2="580" stroke="#ccc" y1="307" x1="73"/>
+<line y2="344" x2="580" stroke="#999" stroke-dasharray="8,2" y1="344" x1="73"/>
+<line y2="382" x2="580" stroke="#999" stroke-dasharray="8,2" y1="382" x1="73"/>
+<line y2="419" x2="580" stroke="#666" y1="419" x1="73"/>
+<line y2="424" x2="77" stroke="#666" y1="48" x1="77"/>
+<line y2="424" x2="108" stroke="#ccc" y1="48" x1="108"/>
+<line y2="424" x2="140" stroke="#ccc" y1="48" x1="140"/>
+<line y2="424" x2="171" stroke="#ccc" y1="48" x1="171"/>
+<line y2="424" x2="203" stroke="#999" y1="48" x1="203"/>
+<line y2="424" x2="234" stroke="#ccc" y1="48" x1="234"/>
+<line y2="424" x2="265" stroke="#ccc" y1="48" x1="265"/>
+<line y2="424" x2="297" stroke="#ccc" y1="48" x1="297"/>
+<line y2="424" x2="328" stroke="#999" y1="48" x1="328"/>
+<line y2="424" x2="360" stroke="#ccc" y1="48" x1="360"/>
+<line y2="424" x2="391" stroke="#ccc" y1="48" x1="391"/>
+<line y2="424" x2="423" stroke="#ccc" y1="48" x1="423"/>
+<line y2="424" x2="454" stroke="#999" y1="48" x1="454"/>
+<line y2="424" x2="486" stroke="#ccc" y1="48" x1="486"/>
+<line y2="424" x2="517" stroke="#ccc" y1="48" x1="517"/>
+<line y2="424" x2="548" stroke="#ccc" y1="48" x1="548"/>
+<line y2="424" x2="580" stroke="#666" y1="48" x1="580"/>
+<path stroke="#29AAE2" stroke-width="2" d="M77,399l31-6,31.5-5,31.5-3,31.5-2s63-1,377-1" fill="none"/>
+<path stroke="#ED1C24" stroke-width="2" stroke-dasharray="2,2" d="M77,399l31-12,31.5-12,31.5-11.5,31.5-8,31.5-5,31.5-3,31.5-2s126-1,283.5-1.236" fill="none"/>
+<path stroke="#8D5CA6" stroke-width="2" stroke-dasharray="15,2,2,2" d="M77,399l31-16,31.5-23,31.5-30,31.5-32,31.5-25.48,31.5-18,31.5-10.5,31.5-6,31.5-3,31.5-1s156-1,189-1" fill="none"/>
+<path stroke="#00A651" stroke-width="2" stroke-dasharray="17,2" d="M580,48c-46-0-126,1-126,1l-31.5,1.5-31.5,4-31.5,6-31.5,13-31.5,21.5-31.5,37.5-31.5,53-31.5,61.5-31.5,61-31.5,46-31.5,28-31.5,17" fill="none"/>
+<rect height="105" width="130" y="88" x="403" rx="5" ry="5" stroke="#ccc" fill="#FFF"/>
+<line y2="122" x2="465" y1="122" x1="430" stroke="#29AAE2" stroke-width="2"/>
+<line y2="140" x2="465" y1="140" x1="430" stroke="#ED1C24" stroke-width="2" stroke-dasharray="2,2"/>
+<line y2="158" x2="465" y1="158" x1="430" stroke="#8D5CA6" stroke-width="2" stroke-dasharray="15,2,2,2"/>
+<line y2="176" x2="465" y1="176" x1="430" stroke="#00A651" stroke-width="2" stroke-dasharray="17,2"/>
+<g font-size="13" font-family="Liberation Sans" font-weight="bold">
+<text>
+<tspan y="53" x="46">20</tspan>
+<tspan y="90" x="46">18</tspan>
+<tspan y="127" x="46">16</tspan>
+<tspan y="164" x="46">14</tspan>
+<tspan y="201" x="46">12</tspan>
+<tspan y="238" x="46">10</tspan>
+<tspan y="275" x="53">8</tspan>
+<tspan y="312" x="53">6</tspan>
+<tspan y="349" x="53">4</tspan>
+<tspan y="386" x="53">2</tspan>
+<tspan y="423" x="53">0</tspan>
+<tspan y="27" x="270" font-size="16">Amdahl's Law</tspan>
+<tspan y="108" x="415">Parallel portion</tspan>
+<tspan y="480" x="256">Number of processors</tspan>
+<tspan y="126" x="475">50%</tspan>
+<tspan y="144" x="475">75%</tspan>
+<tspan y="162" x="475">90%</tspan>
+<tspan y="180" x="475">95%</tspan>
+</text>
+<text transform="matrix(0 -1 1 0 0 5)">
+<tspan y="25" x="-255">Speedup</tspan>
+<tspan y="81" x="-434">1</tspan>
+<tspan y="113" x="-434">2</tspan>
+<tspan y="144" x="-434">4</tspan>
+<tspan y="176" x="-434">8</tspan>
+<tspan y="207" x="-441">16</tspan>
+<tspan y="239" x="-441">32</tspan>
+<tspan y="270" x="-441">64</tspan>
+<tspan y="302" x="-448">128</tspan>
+<tspan y="333" x="-448">256</tspan>
+<tspan y="364" x="-448">512</tspan>
+<tspan y="396" x="-455">1024</tspan>
+<tspan y="427" x="-455">2048</tspan>
+<tspan y="459" x="-455">4096</tspan>
+<tspan y="490" x="-455">8192</tspan>
+<tspan y="522" x="-462">16384</tspan>
+<tspan y="553" x="-462">32768</tspan>
+<tspan y="585" x="-462">65536</tspan>
+</text>
+</g>
+</svg>

@@ -80,15 +80,15 @@ The Go runtime's profiling interface is in the `runtime/pprof` package.
 
 `runtime/pprof` is a very low level tool, and for historic reasons the interfaces to the different kinds of profile are not uniform.
 
-A few years ago I wrote a small package, [[https://github.com/pkg/profile][github.com/pkg/profile]], to make it easier to profile an application.
+A few years ago I wrote a small package, [https://github.com/pkg/profile], to make it easier to profile an application.
 
 ```
 import "github.com/pkg/profile"
     
-	func main() {
-		defer profile.Start().Stop()
-		...
-	}
+func main() {
+	defer profile.Start().Stop()
+	...
+}
 ```
 We'll use the profile package throughout this workshop, but feel free to ask me in a break to demonstrate how to use the `runtime/pprof` interface directly.
 
@@ -97,35 +97,99 @@ We'll use the profile package throughout this workshop, but feel free to ask me 
 Now that we've talked about what pprof can measure, and how to generate a profile, let's talk about how to use pprof to analyse a profile.
 
 The analysis is driven by the `go pprof` subcommand
-
-    go tool pprof /path/to/your/profile
+```
+go tool pprof /path/to/your/profile
+```
 
 _Note_: Since Go 1.9 the profile file contains all the information needed to render the profile. You do no longer need the binary which produced the profile. 🎉
 
-.link http://blog.golang.org/profiling-go-programs Further reading: Profiling Go programs
-.link https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs Further reading: Debugging performance issues in Go programs
+#### Further reading
+
+- [Profiling Go programs](http://blog.golang.org/profiling-go-programs) (Go Blog)
+- [Debugging performance issues in Go programs](https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs)
 
 ## CPU profiling (exercise)
 
 Let's write a program to count words:
-
-[examples/words/main.go](examples/words/main.go)
-
-Let's see how many words there are in herman melville's classic moby dick.
-
 ```
-% go run main.go moby.txt 
+package main
+
+import (
+        "fmt"
+        "io"
+        "log"
+        "os"
+        "unicode"
+)
+
+func readbyte(r io.Reader) (rune, error) {
+        var buf [1]byte
+        _, err := r.Read(buf[:])
+        return rune(buf[0]), err
+}
+
+func main() {
+        f, err := os.Open(os.Args[1])
+        if err != nil {
+                log.Fatalf("could not open file %q: %v", os.Args[1], err)
+        }
+
+        words := 0
+        inword := false
+        for {
+                r, err := readbyte(f)
+                if err == io.EOF {
+                        break
+                }
+                if err != nil {
+                        log.Fatalf("could not read file %q: %v", os.Args[1], err)
+                }
+                if unicode.IsSpace(r) && inword {
+                        words++
+                        inword = false
+                }
+                inword = unicode.IsLetter(r)
+        }
+        fmt.Printf("%q: %d words\n", os.Args[1], words)
+}
+```
+Let's see how many words there are in Herman Melville's classic [Moby Dick](https://www.gutenberg.org/ebooks/2701) (sourced from Project Gutenberg)
+```
+% time go run main.go moby.txt
 "moby.txt": 181275 words
-```
 
+real    0m2.110s
+user    0m1.264s
+sys     0m0.944s
+```
 Let's compare that to unix's `wc -w`
 ```
-% wc -w  moby.txt 
-215829 moby.txt
+% time wc -w  moby.txt
+  215829 moby.txt
+
+real    0m0.012s
+user    0m0.009s
+sys     0m0.002s
 ```
+So the numbers aren't the same. `wc` is about 19% higher because what it considers a word is different to what my simple program does. That's not important--both programs take the whole file as input and 
+
 Let's investigate why these programs have different run times using pprof.
 
-## Using pprof (cont.) 
+### Add CPU profiling
+
+First, edit he 
+```
+% go run main.go moby.txt
+2018/08/18 15:46:05 profile: cpu profiling enabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile309242028/cpu.pprof
+"moby.txt": 181275 words
+2018/08/18 15:46:07 profile: cpu profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile309242028/cpu.pprof
+```
+#### Extra credit
+
+Why did I use a large piece of text to benchmark my code?
+
+
+## Memory profiling
 
 The output of a memory profile can be similarly visualised.
 
@@ -154,7 +218,7 @@ Here is a visualisation of a block profile:
 ```
 ![block profile](images/block.svg) 
 
-* Exercise
+## Exercise
 
 - Generate a profile from a piece of code you know well. If you don't have a code sample, try profiling `godoc`.
 

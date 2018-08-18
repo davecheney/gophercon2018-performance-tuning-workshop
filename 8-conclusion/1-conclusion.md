@@ -18,13 +18,19 @@ Shorter code is _smaller_ code; which is important for the CPU's cache.
 
 Pay very close attention to allocations, avoid unnecessary allocation where possible.
 
+## Be on the lookout for quadratic operations
+
+> If a program is too slow, it must have a loop -- Ken Thompson
+
+When the number of elemen
+
+
+
 Don't trade performance for reliability
 
-"I can make things very fast if they don't have to be correct."
-.caption Russ Cox
+> I can make things very fast if they don't have to be correct. -- Russ Cox
 
-"Readable means reliable"
-.caption Rob Pike
+> Readable means reliable -- Rob Pike
 
 Performance and reliability are equally important.
 
