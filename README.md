@@ -23,11 +23,13 @@ The general theme is to start from the smallest pieces, profiling a small piece 
 | --- | --- |
 | 09:00 | [Welcome and introduction][1] |
 | 09:30 | [Profiling (dfc)][2] |
-| 10:15 | Benchmarking (francesc) |
-| 11:00 | [Compiler optimisation (dfc)][4]|
-| 12:00 | Lunch |
+| 10:15 | Break (15 minutes) |
+| 10:30 | Benchmarking (francesc) |
+| 11:15 | [Compiler optimisation (dfc)][4]|
+| 12:00 | Lunch (90 minutes) |
 | 13:30 | Execution tracer (francesc) |
 | 14:30 | Memory and Garbage collection (francesc) |
+| 15:15 | Break (15 minutes) |
 | 15:30 | [Tips and tricks (dfc)][6] |
 | 16:00 | Exercises |
 | 16:45 | [Final Questions and conclusion][8] |
