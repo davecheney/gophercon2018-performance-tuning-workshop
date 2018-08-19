@@ -1,4 +1,4 @@
-# The past and future of Microprocessors
+# The past and future of Microprocessor performance
 
 I want to start today with a short lecture on how I think about the history of the evolution of computers and why I think writing high performance software is important .
 
@@ -8,7 +8,7 @@ The reality is that software runs on hardware, so to talk about writing high per
 
 ## Mechanical Sympathy 
 
-![image-20180818145606919](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/image-20180818145606919.png)
+![image-20180818145606919](images/image-20180818145606919.png)
 
 There is a term in popular use at the moment, you’ll hear people like Martin Thompson or Bill Kennedy talk about “mechanical sympathy”
 
@@ -20,15 +20,15 @@ I believe the same is true for us as software engineers. I don’t think any of 
 
 There’s a common internet meme that goes something like this;
 
-![Screen Shot 2018-08-18 at 2.57.18 pm](/Users/dfc/Desktop/Screen Shot 2018-08-18 at 2.57.18 pm.png)
+![jalopnik](images/jalopnik.png)
 
 Of course this is preposterous, but it underscores just how much has changed in the computing industry.
 
-As software authors all of us in this room have benefited from Moore's Law, the doubling of the number of available transistors on a chip every 18 months, for 50 years. No other industry has experienced a six order of magnitude improvement in their tools in the space of a lifetime.
+As software authors all of us in this room have benefited from Moore's Law, the doubling of the number of available transistors on a chip every 18 months, for 50 years. **No other industry has experienced a six order of magnitude improvement in their tools in the space of a lifetime**.
 
 But this is all changing.
 
-## Computers are not getting (much) faster
+## Are computers still getting faster?
 
 So the fundamental question is, confronted with statistic like the ones on the slide page, we should ask the question;
 
@@ -38,17 +38,15 @@ If computers are still getting faster, maybe we don’t need to care about the p
 
 ### Let's look at the data
 
-This is the classic data you’ll find in textbooks like Computer Architecture, A Quantitative Approach by John L. Hennessy and David A. Patterson. This graph was taken from the 5th edition
+This is the classic data you’ll find in textbooks like *Computer Architecture, A Quantitative Approach* by John L. Hennessy and David A. Patterson. This graph was taken from the 5th edition
 
 ![graph](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/graph.png)
 
 Hennessey and Patterson argue that there are three eras
 
-The first was the 1970’s and 80’s which were really formative years, microprocessors as we know them today didn’t really exist, computers were built from discrete transistors or small scale integrated circuits.
-
-From the mid 80s to 2004 the trend line is clear. Computer integer performance improved by 52% each year. Computer power doubled every two years, hence people conflated Moore’s law — the doubling of the number of transistors on a die, with computer performance.
-
-Then we come to the third era of computer performance. Things slow down. The aggregate rate of change is 22% per year. 
+- The first was the 1970’s and 80’s which were really formative years, microprocessors as we know them today didn’t really exist, computers were built from discrete transistors or small scale integrated circuits.
+- From the mid 80s to 2004 the trend line is clear. Computer integer performance improved by 52% each year. Computer power doubled every two years, hence people conflated Moore’s law — the doubling of the number of transistors on a die, with computer performance.
+- Then we come to the third era of computer performance. Things slow down. The aggregate rate of change is 22% per year. 
 
 That previous graph only went up to 2012, but fortuntaly in 2012 [Jeff Preshing][0] wrote a [tool to scrape the Spec website and build your own graph][1].
 
@@ -56,24 +54,27 @@ That previous graph only went up to 2012, but fortuntaly in 2012 [Jeff Preshing]
 
 So this is the same graph using Spec data from 1995 til 2017.
 
-To me, rather than the step change we saw in the 2012 data, I’d say that _single core_ performance is approaching a limit.
+To me, rather than the step change we saw in the 2012 data, I’d say that _single core_ performance is approaching a limit. The numbers are slightly better for floating point, but for us in the room doing line of business applications, this is probably not that relevant.
 
-The numbers are slightly better for floating point, but for us in the room doing line of business applications, this is probably not that relevant.
+### Yes, computer are still getting faster, slowly
 
 > The first thing to remember about the ending of Moore's law is something Gordon Moore told me. He said "All exponentials come to an end". -- [John Hennessy][2]
 
-### Yes! Computer are still getting faster, slowly
-
-Single threaded integer performance is still improving around 2-3% per year. At this rate 
+This is Hennessy's quote from Google Next 18 and his Turing Award lecture. His contention is yes, CPU performance is still improving. However, single threaded integer performance is still improving around 2-3% per year. At this rate its going to take 20 years of compounding growth to double integer performance. Compare that to the go-go days of the 90's where performance was doubling every two years.
 
 Why is this happening?
 
+## Clock speeds
+
+![stuttering](images/stuttering.png)
+
+This graph from 2015 demonstrates this well. The top line shows the number of transistors on a die. This has continued in a roughly linear trend line since the 1970's. As this is a log-lin graph this linear series represents exponential growth.
+
+However, If we look at the middle line, we see clock speeds have not increased in a decade, we see that cpu speeds stalled around 2004
+
+The bottom graph shows thermal dissipation power; that is electrical power that is turned into heat follows a same pattern--clock speeds and cpu heat dissipation are correlated.
+
 ## Heat
-
-Power consumption of a chip, and thus heat dissipation, is directly proportional to major two factors
-
-1. Number of transition per second—Clock speed
-2. gate leakage. these two transistors are not ideal, even in steady state, one is never perfectly off, and the other is never perfectly on, so they both behave like resistors. This leakage represents a static power drain, burnt off as heat.
 
 It was postulated around 2004 that if we followed the trend line increasing clock speed and shrinking transistor dimensions then within a processor generation the transistor junction would give off as much heat as the core of a nuclear reactor
 
@@ -81,21 +82,38 @@ It was postulated around 2004 that if we followed the trend line increasing cloc
 
 Obviously this is was lunacy. The Pentium 4 [marked the end of the line][3] for single core, high frequency, consumer CPUs.
 
-## Denard Scaling
+## Dennard Scaling
 
-- power law equation
+To understand what happened next we need to look to a paper written in 1974 co-authored by [Robert H. Dennard](https://en.wikipedia.org/wiki/Robert_H._Dennard). Dennard's Scaling law states, roughly, that as transistors get smaller their [power density](https://en.wikipedia.org/wiki/Power_density) stays constant. 
 
-### Smaller transistors are aimed at reducing power consumption not improving performance.
+dynamic power; 
 
-So, now we know that CPU feature size reductions are primarily aimed at reducing power consumption.
+static power; gate leakage
+
+
+
+Power consumption of a chip, and thus heat dissipation, is directly proportional to major two factors
+
+1. Number of transition per second—Clock speed
+2. gate leakage. these two transistors are not ideal, even in steady state, one is never perfectly off, and the other is never perfectly on, so they both behave like resistors. This leakage represents a static power drain, burnt off as heat.
+
+
+
+
+
+Thus Smaller transistors are aimed at reducing power consumption not improving performance.
+
+## The end of Dennards scaling
+
+So let’s return to this graph, we see that the reason clock speeds have stalled is because cpu’s exceeded our ability to cool them. So, now we know that CPU feature size reductions are primarily aimed at reducing power consumption.
 
 Reducing power consumption doesn't just mean “green”, like recycle, save the polar bears. 
 
 The primary goal is to keep power consumption, and thus heat dissipation, below levels that will damage the CPU.
 
-![stuttering](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/stuttering.png)
+![stuttering](images/stuttering.png)
 
-So let’s return to this graph, we see that the reason clock speeds have stalled is because cpu’s exceeded our ability to cool them.
+However by 2006 the ability for chip makers to continue to reduce the size of the transitor started to 
 
 But, there is one part of the graph that is continuing to increase, the number of transistors on a die. The march of cpu features size, more transistors in the same given area, has both positive and negative effects.
 
@@ -109,11 +127,13 @@ Also, as you can see in the insert, the cost per transistor continued to fall un
 
 
 
-![gate-length](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/gate-length.png)
+![gate-length](images/gate-length.png)
 
 Not only is it getting more expensive to create smaller transistors, it’s getting harder. This report from 2016 shows the prediction of what the chip makers believed would occur in 2013; two years later they had missed all their predictions, and while I don’t have an updated version of this report, there are no signs that they are going to be able to reverse this trend. 
 
 It is costing intel, TSMC, AMD, and Samsung billions of dollars because they have to build new fabs, buy all new process tooling. So while the number of transistors per die continues to increase, their unit cost has started to increase.
+
+_note_: Even the term gate length, measured in nano meters has become ambigious. Various manufacturers measure the size of their transistors in different ways allowing them to demonstate a smaller number than their competitors without perhaps delivering. This is the Non-GAAP Earning reporting model of CPU manufacturers.
 
 So, what are most of these transistors doing?
 
@@ -121,7 +141,7 @@ https://spectrum.ieee.org/semiconductors/devices/transistors-could-stop-shrinkin
 
 ## More cores
 
-![highrescpudies_fullyc_020-1105](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/highrescpudies_fullyc_020-1105.png)
+![highrescpudies_fullyc_020-1105](images/highrescpudies_fullyc_020-1105.png)
 
 They’re going towards adding more CPU cores. 
 
