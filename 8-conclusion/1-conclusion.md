@@ -26,7 +26,17 @@ When the number of elemen
 
 
 
-Don't trade performance for reliability
+Limit the communication and points of co-ordination between the parts of your program to ride Ahmdawls law
+
+Performance rule of thumb:
+
+Network/disk io >> allocations >> function calls
+
+If your program is dominated by network or disk access, don’t bother optimising allocations. 
+
+If your program is allocation bound, don’t bother optimising functions for inlining, loop unrolling, etc.
+
+## Don't trade performance for reliability
 
 > I can make things very fast if they don't have to be correct. -- Russ Cox
 
@@ -35,7 +45,3 @@ Don't trade performance for reliability
 Performance and reliability are equally important.
 
 I see little value in making a very fast server that panics, deadlocks or OOMs on a regular basis.
-
-Don't trade performance for reliability
-
-
