@@ -85,13 +85,12 @@ This digram is taken from a great [data sheet produced by TI][7]. In this model 
 ![cmos-inverter](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/cmos-inverter.png)
 
 1. Static power. When a transistor is static, that is, not changing its state, there is a small amount of current that leaks through the transistor to ground. The smaller the transistor, the more leakage. So the power consumed by this leakage is the voltage the chip operates multiplied by the leakage current and the number of transistors on the die. Even a minute amount of leakage adds up when you have billions of transistors!
-2. Dynamic power. When a transistor is 
-
-
+2. Dynamic power. When a transistor transitions from one state to another, it must charge or discharge the various capacitances it is connected to the gate.
+3. Crowbar, or short circuit current. We like to think of transistors as digital devices occupying one state or another, off or on, atomically. In reality a transistor is an analog device. As a switch a transistor starts out _mostly_ off, and transitions, or switches, to a state of being _mostly_ on. This transition or switching time is very fast, in modern processors it is in the order of pico seconds, but that still represents a period of time when there is a low resistance path from Vcc to ground. The faster the transistro transitions, its frequency, the more heat is disipated.
 
 It was postulated around 2004 that if we followed the trend line increasing clock speed and shrinking transistor dimensions then within a processor generation the transistor junction would give off as much heat as the core of a nuclear reactor
 
-![pant-GLSVLSI-talk-1338](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/pant-GLSVLSI-talk-1338.png)
+![pant-GLSVLSI-talk-1338](images/pant-GLSVLSI-talk-1338.png)
 
 Obviously this is was lunacy. The Pentium 4 [marked the end of the line][3] for single core, high frequency, consumer CPUs.
 
@@ -99,13 +98,7 @@ Obviously this is was lunacy. The Pentium 4 [marked the end of the line][3] for 
 
 To understand what happened next we need to look to a paper written in 1974 co-authored by [Robert H. Dennard](https://en.wikipedia.org/wiki/Robert_H._Dennard). Dennard's Scaling law states, roughly, that as transistors get smaller their [power density](https://en.wikipedia.org/wiki/Power_density) stays constant. 
 
-
-1. Number of transition per second—Clock speed
-2. gate leakage. these two transistors are not ideal, even in steady state, one is never perfectly off, and the other is never perfectly on, so they both behave like resistors. This leakage represents a static power drain, burnt off as heat.
-
-
-
-
+Since the 1970's, Dennard's scaling rule held up quite well. As transistors became smaller, they could operate at lower voltages, thus reducing the amount of power they consumed as the power consumed by a transistor is a function of the square of the voltage. But as the gate lenth of the transistor approaches the width of a silicon atom, the relationship between 
 
 Thus Smaller transistors are aimed at reducing power consumption not improving performance.
 
