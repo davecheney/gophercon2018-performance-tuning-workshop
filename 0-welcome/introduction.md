@@ -26,7 +26,7 @@ There’s a common internet meme that goes something like this;
 
 Of course this is preposterous, but it underscores just how much has changed in the computing industry.
 
-As software authors all of us in this room have benefited from Moore's Law, the doubling of the number of available transistors on a chip every 18 months, for 50 years. **No other industry has experienced a six order of magnitude improvement in their tools in the space of a lifetime**.
+As software authors all of us in this room have benefited from Moore's Law, the doubling of the number of available transistors on a chip every 18 months, for 50 years. **No other industry has experienced a four order of magnitude improvement in their tools in the space of a lifetime**.
 
 But this is all changing.
 
@@ -60,7 +60,7 @@ To me, rather than the step change we saw in the 2012 data, I’d say that _sing
 
 > The first thing to remember about the ending of Moore's law is something Gordon Moore told me. He said "All exponentials come to an end". -- [John Hennessy][2]
 
-This is Hennessy's quote from Google Next 18 and his Turing Award lecture. His contention is yes, CPU performance is still improving. However, single threaded integer performance is still improving around 2-3% per year. At this rate its going to take 20 years of compounding growth to double integer performance. Compare that to the go-go days of the 90's where performance was doubling every two years.
+This is Hennessy's quote from Google Next 18 and his Turing Award lecture. His contention is yes, CPU performance is still improving. However, single threaded integer performance is still improving around 3% per year. At this rate its going to take 20 years of compounding growth to double integer performance. Compare that to the go-go days of the 90's where performance was doubling every two years.
 
 Why is this happening?
 
@@ -72,49 +72,43 @@ This graph from 2015 demonstrates this well. The top line shows the number of tr
 
 However, If we look at the middle line, we see clock speeds have not increased in a decade, we see that cpu speeds stalled around 2004
 
-The bottom graph shows thermal dissipation power; that is electrical power that is turned into heat follows a same pattern--clock speeds and cpu heat dissipation are correlated.
+The bottom graph shows thermal dissipation power; that is electrical power that is turned into heat, follows a same pattern--clock speeds and cpu heat dissipation are correlated.
 
 ## Heat
 
 Why does a CPU produce heat? It's a solid state device, there are no moving components, so effects like friction are not (directly) relvant here.
 
-The power consumption of a CMOS device, which is what every transistor in this room, on your desk, and in your pocket, is made from, is combination of three factors.
-
 This digram is taken from a great [data sheet produced by TI][7]. In this model the switch in N typed devices is attracted to a positive voltage P type devices are repelled from a positive voltage.
 
 ![cmos-inverter](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/cmos-inverter.png)
 
-1. Static power. When a transistor is static, that is, not changing its state, there is a small amount of current that leaks through the transistor to ground. The smaller the transistor, the more leakage. So the power consumed by this leakage is the voltage the chip operates multiplied by the leakage current and the number of transistors on the die. Even a minute amount of leakage adds up when you have billions of transistors!
-2. Dynamic power. When a transistor transitions from one state to another, it must charge or discharge the various capacitances it is connected to the gate.
-3. Crowbar, or short circuit current. We like to think of transistors as digital devices occupying one state or another, off or on, atomically. In reality a transistor is an analog device. As a switch a transistor starts out _mostly_ off, and transitions, or switches, to a state of being _mostly_ on. This transition or switching time is very fast, in modern processors it is in the order of pico seconds, but that still represents a period of time when there is a low resistance path from Vcc to ground. The faster the transistro transitions, its frequency, the more heat is disipated.
+The power consumption of a CMOS device, which is what every transistor in this room, on your desk, and in your pocket, is made from, is combination of three factors.
 
-It was postulated around 2004 that if we followed the trend line increasing clock speed and shrinking transistor dimensions then within a processor generation the transistor junction would give off as much heat as the core of a nuclear reactor
-
-![pant-GLSVLSI-talk-1338](images/pant-GLSVLSI-talk-1338.png)
-
-Obviously this is was lunacy. The Pentium 4 [marked the end of the line][3] for single core, high frequency, consumer CPUs.
-
-## Dennard Scaling
-
-To understand what happened next we need to look to a paper written in 1974 co-authored by [Robert H. Dennard](https://en.wikipedia.org/wiki/Robert_H._Dennard). Dennard's Scaling law states, roughly, that as transistors get smaller their [power density](https://en.wikipedia.org/wiki/Power_density) stays constant. 
-
-Since the 1970's, Dennard's scaling rule held up quite well. As transistors became smaller, they could operate at lower voltages, thus reducing the amount of power they consumed as the power consumed by a transistor is a function of the square of the voltage. But as the gate lenth of the transistor approaches the width of a silicon atom, the relationship between 
-
-Thus Smaller transistors are aimed at reducing power consumption not improving performance.
+1. Static power. When a transistor is static, that is, not changing its state, there is a small amount of current that leaks through the transistor to ground. The smaller the transistor, the more leakage. Leakage increases with temperature. Even a minute amount of leakage adds up when you have billions of transistors!
+2. Dynamic power. When a transistor transitions from one state to another, it must charge or discharge the various capacitances it is connected to the gate. Dynamic power per transistor is the voltage squared times the capacitance and the frequency of change. Lowering the voltage can reduce the power consumed by a transistor, but lower voltages causes the transistor to switch slower.
+3. Crowbar, or short circuit current. We like to think of transistors as digital devices occupying one state or another, off or on, atomically. In reality a transistor is an analog device. As a switch a transistor starts out _mostly_ off, and transitions, or switches, to a state of being _mostly_ on. This transition or switching time is very fast, in modern processors it is in the order of pico seconds, but that still represents a period of time when there is a low resistance path from Vcc to ground. The faster the transistor  switches, its frequency, the more heat is disipated.
 
 ## The end of Dennard scaling
 
-Returning to this graph, we see that the reason clock speeds have stalled is because cpu’s exceeded our ability to cool them. So, now we know that CPU feature size reductions are primarily aimed at reducing power consumption. Reducing power consumption doesn't just mean “green”, like recycle, save the planet. The primary goal is to keep power consumption, and thus heat dissipation, below levels that will damage the CPU.
+To understand what happened next we need to look to a paper written in 1974 co-authored by [Robert H. Dennard](https://en.wikipedia.org/wiki/Robert_H._Dennard). Dennard's Scaling law states roughly that as transistors get smaller their [power density](https://en.wikipedia.org/wiki/Power_density) stays constant. Smaller transistors can run at lower voltages, have lower gate capacitence, and switch faster, which helps reduce the amount of dynamic power.
+
+So how did that work out?
+
+![power-density](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/power-density.png)
+
+It turns out not so great. As the gate lenth of the transistor approaches the width of a few silicon atom, the relationship between transistor size, voltage, and importantly leakage broke down. 
+
+It was postulated at the [Micro-32 conference in 1999][16] that if we followed the trend line of increasing clock speed and shrinking transistor dimensions then within a processor generation the transistor junction would approach the temperature of the core of a nuclear reactor. Obviously this is was lunacy. The Pentium 4 [marked the end of the line][3] for single core, high frequency, consumer CPUs. 
+
+Returning to this graph, we see that the reason clock speeds have stalled is because cpu’s exceeded our ability to cool them. By 2006 reducing the size of the transitor no longer improved its power efficiency.
+
+We now know that CPU feature size reductions are primarily aimed at reducing power consumption. Reducing power consumption doesn't just mean “green”, like recycle, save the planet. The primary goal is to keep power consumption, and thus heat dissipation, [below levels that will damage the CPU][14].
 
 ![stuttering](images/stuttering.png)
 
-However by 2006 the ability for chip makers to continue to reduce the size of the transitor started to 
-
 But, there is one part of the graph that is continuing to increase, the number of transistors on a die. The march of cpu features size, more transistors in the same given area, has both positive and negative effects.
 
-Smaller transistors can run at lower voltages, have lower gate capacitence, and switch faster, which helps reduce the amount of dynamic power.
 
-However smaller transistors tend to be less binary towards being off or on, so the static power, the leakage current increases.
 
 Also, as you can see in the insert, the cost per transistor continued to fall until around 5 years ago, and then the cost per transistor started to go back up again.
 
@@ -126,29 +120,25 @@ It is costing intel, TSMC, AMD, and Samsung billions of dollars because they hav
 
 _note_: Even the term gate length, measured in nano meters, has become ambigious. Various manufacturers measure the size of their transistors in different ways allowing them to demonstate a smaller number than their competitors without perhaps delivering. This is the Non-GAAP Earning reporting model of CPU manufacturers.
 
-So, what are most of these transistors doing?
-
 https://spectrum.ieee.org/semiconductors/devices/transistors-could-stop-shrinking-in-2021
 
 ## More cores
 
 ![highrescpudies_fullyc_020-1105](images/highrescpudies_fullyc_020-1105.png)
 
-They’re going towards adding more CPU cores. 
+With thermal and frequency limits reached it’s no longer possible to make a single core run twice as fast. But, if you add another cores you can provide twice the processing capacity — if the software can support it.
 
-CPUs are not getting faster, but they are getting wider with hyper threading and multiple cores. Dual core on mobile parts, quad core on desktop parts, dozens of cores on server parts.
-
-In truth, the core count of a CPU is dominated by heat dissipation. So much so that the clock speed of a CPU is some arbitrary number between 1 and 4 Ghz depending on how hot it is. We'll see this shortly when we talk about benchmarking.
-
-It’s no longer possible to make a single core run twice as fast, but if you add another cores you can provide twice the processing capacity — if the software can support it.
+In truth, the core count of a CPU is dominated by heat dissipation. The end of Dennard scaling means that the clock speed of a CPU is some arbitrary number between 1 and 4 Ghz depending on how hot it is. We'll see this shortly when we talk about benchmarking.
 
 ## Amdahl's law
+
+CPUs are not getting faster, but they are getting wider with hyper threading and multiple cores. Dual core on mobile parts, quad core on desktop parts, dozens of cores on server parts. Will this be the future of computer performance? Unfortunately not.
 
 Amdahl's law, named after the Gene Amdahl is a formula which gives the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved.
 
 ![AmdahlsLaw](images/AmdahlsLaw.svg)
 
-Amdahl's law tell sus that the maximum speedup of a program is limited by the sequental parts of the program. If you write a program with 95% of its execution able to be run in parallel, even with thousands of processors the maximum speedup in the programs execution is limited to 20x. 
+Amdahl's law tells us that the maximum speedup of a program is limited by the sequental parts of the program. If you write a program with 95% of its execution able to be run in parallel, even with thousands of processors the maximum speedup in the programs execution is limited to 20x. 
 
 Think about the programs that you work on every day, how much of their execution is parallisable?
 
@@ -160,35 +150,25 @@ Much of the improvement in performance in the last two decades has come from arc
 
 ### Out of order execution
 
-Out of order, also known as super scalar, execution is a way of extracting so called _Instruction level parallism_ from the code the CPU is executing. Modern CPUs effectively do SSA at the hardware level to establish data dependencies between operations, and where possible run independant operations in parallel. 
+Out of order, also known as super scalar, execution is a way of extracting so called _Instruction level parallism_ from the code the CPU is executing. Modern CPUs effectively do SSA at the hardware level to identify data dependencies between operations, and where possible run independant operations in parallel. 
 
-However there is a limit to the amount of parallism inherent in any piece of code. It's also tremendously power hungry as tracking 
+However there is a limit to the amount of parallism inherent in any piece of code. It's also tremendously power hungry. Most modern CPUs have settled on six execution units per core as there is an n squared cost of connecting each execution unit to all others at each stage of the pipeline.
 
 
 ### Speculative execution
+
+One of the problems with out of order execution is branches and memory loads. When a CPU reaches a branch
+
+Super scalar execution, as we're all learning about through Spectre style vulnerabilities chooses 
 
 To avoid the stalls inherent with branches and loads
 
 (super-scalar) -- requires register renaming
 speculative execution -- huge power waste
 
-Cliff Click has a [wonderful presentation][10] that argues out of order and speculative execution is most useful for 
-
-
-
-vector (SSE) instructions
-
-All are aimed at extracting instruction level parallism -- the ability to transparently 
-
-Dynamic instruction level parallism
-
-- craps out around 6 in flight operations -- because of ahmdals law, and because of the power spent 
+Cliff Click has a [wonderful presentation][10] that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
 
 All these optimisations lead to the improvements in single threaded performance we've seen, at the cost of huge numbers of transistors and power.
-
-Another place that the transistors are being spent is expensive dynamic optimisations embedded in the CPU itself.
-
-
 
 ## Modern CPUs are optimised for bulk operations
 
@@ -221,9 +201,15 @@ So, most modern processors are limited by memory latency not capacity.
 
 ![memory-latency](images/memory-latency.png)
 
-For decades CPUs have a cache, a piece of small memory
+For decades CPUs have a cache, a piece of small fast memory located closer, and now directly integrated onto, the CPU. 
 
-By caches are limited in size because they are physically large on the CPU die, consume a lot of power
+- L1 has been stuck at 32kb per core for decades
+- L2 has slowly crept up to 512kb on the largest intel parts
+- L3 is now measured in 4-32mb range, but its access time is variable
+
+![pasted-image-1109](images/pasted-image-1109.png)
+
+By caches are limited in size because they are [physically large on the CPU die][15], consume a lot of power. Additionally to halve the cache miss rate you must _quadruple_ the cache size.
 
 ## The free lunch is over
 
@@ -235,26 +221,30 @@ Moore's Law is still in effect, but for all of us in this room, the free lunch i
 
 ## Conclusion
 
-Ok, so that's all doom and gloom. What's the upside?
+> The numbers I would cite would be by 2010: 30GHz, 10billion transistors, and 1 tera-instruction per second.-- [Pat Gelsinger, Intel CTO, April 2002][12]
+
+It's clear that without a breakthrough in material science the likelyhood of a return to the days of 52% year on year growth in CPU performances is diminishingly small. The common consensus is that the fault lies not with the material science itself, but how the transistors are being used. The logical model of sequential instruction flow as expressed in silicon has lead to this expensive endgame. 
 
 There are many presentations online that rehash this material. They all have the same prediction -- computers in the future will not be programmed like they are today. Some argue it'll look more like graphics cards with hundreds of very dumb, very incoherant processors. Others argue that Very Long Instruction Word (VLIW) computers will become predominant. All agree that our current sequential programming languages will not be compatible with these kinds of processors.
 
-My view is that these predictions are right, the outlook for hardware manufacturers saving us at this point is grim. However, there is _enormous_ scope to optimise the programs today we write for the hardware we have today. Rick Hudson spoke at GopherCon 2015 about [re engaging with a "virtuious cycle"][8] of software that works _with_ the hardware we have today, not in spite of it.
+My view is that these predictions are right, the outlook for hardware manufacturers saving us at this point is grim. However, there is _enormous_ scope to optimise the programs today we write for the hardware we have today. Rick Hudson spoke at GopherCon 2015 about [re engaging with a "virtuious cycle"][8] of software that works _with_ the hardware we have today, not indiferent of it.
 
-Over from 2015 to 2018 looking at the graphs I showed earlier, with at best 5-8% improvement in integer performance and less than that in memory latency, the Go team decreased the garbage collector pause by [two orders of magnitude][11].
+Over from 2015 to 2018 looking at the graphs I showed earlier, with at best a 5-8% improvement in integer performance and less than that in memory latency, the Go team decreased the garbage collector pause by [two orders of magnitude][11].
 
 So, for best performance on today's hardware in today's world, you need a programming language which:
 
-- Is compiled, not interpreted, because interpreted programming languages operate poorly with CPU branch predictors and speculative execution.
+- Is compiled, not interpreted, because interpreted programming languages interact poorly with CPU branch predictors and speculative execution.
 - You need a language which permits efficient code to be written, it needs to be able to talk about bits and bytes, and the length of an integer efficiently, rather than pretend every number is an ideal float.
 - You need a language which lets programmers talk about memory effectively, think structs vs java objects, because all that pointer chasing puts pressure on the CPU cache and cache misses burn hundreds of cycles.
 - A programming language that scales to multiple cores as  performance of an application is determined by how efficiently it uses its cache and how efficiently it can parallise work over multiple cores.
 
+Obviously we're here to talk about Go, and I believe that Go inherits many of the traits I just described.
+
 ### Further reading
 
 - [The future of computing: a conversation with John Hennessy][2]  (Google I/O '18)
-- Guy from CPP con 2016 / 2017
 - [The Future of Microprocessors][6] JuliaCon 2018
+- [50 Years of Computer Architecture: From Mainframe CPUs to DNN TPUs, David Patterson][13]
 
 [0]: http://preshing.com/20120208/a-look-back-at-single-threaded-cpu-performance/
 [1]: https://github.com/preshing/analyze-spec-benchmarks
@@ -268,5 +258,8 @@ So, for best performance on today's hardware in today's world, you need a progra
 [9]: https://en.wikipedia.org/wiki/List_of_Intel_CPU_microarchitectures#Pentium_4_/_Core_Lines
 [10]: https://www.youtube.com/watch?v=OFgxAFdxYAQ
 [11]: https://blog.golang.org/ismmkeynote
-
-
+[12]: https://www.cnet.com/news/intel-cto-chip-heat-becoming-critical-issue/
+[13]: https://www.youtube.com/watch?v=HnniEPtNs-4
+[14]: https://en.wikipedia.org/wiki/Electromigration#Practical_implications_of_electromigration
+[15]: http://www.itrs.net/Links/2000UpdateFinal/Design2000final.pdf
+[16]: https://pdfs.semanticscholar.org/6a82/1a3329a60def23235c75b152055c36d40437.pdf
