@@ -2,8 +2,6 @@ package main
 
 import "fmt"
 
-// START OMIT
-
 type Point struct{ X, Y int }
 
 const Width = 640
@@ -19,5 +17,3 @@ func NewPoint() {
 	Center(p)
 	fmt.Println(p.X, p.Y)
 }
-
-// END OMIT

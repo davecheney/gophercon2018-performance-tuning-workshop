@@ -1,41 +1,69 @@
 # Compiler optimisations
 
-This section gives a brief background on three important optimisations that the Go compiler performs.
+This section covers three important optimisations that the Go compiler performs.
 
 - Escape analysis
 - Inlining
 - Dead code elimination
 
-These are all handled in the front end of the compiler, while the code is still in its AST form; then the code is passed to the SSA compiler for further optimisation. 
-
 ## History of the Go compiler
 
-The Go compiler started as a fork of the Plan9 compiler tool chain ~ 2007.
+The Go compiler started as a fork of the Plan9 compiler tool chain circa 2007. The compiler at that time bore a strong resemblence to Aho and Ullman's [_Dragon Book_][0].
 
-In Go 1.5 the compiler was mechanically translated into Go.
+In 2015 the then Go 1.5 compiler was mechanically translated from [C into Go][2].
 
-In Go 1.7 the 'back end' of the compiler was rewritten from the Plan9 style code generation to a new form using [SSA][1] techniques.
+A year later, Go 1.7 introduced a [new compiler backend][3] based on [SSA][1] techniques replaced the previous  Plan 9 style code generation. This new backend introduced many opportunities for generic and architecture specific optimistions.
 
 ## Escape analysis
 
-A compliant Go implementation _could_ store every allocation on the heap, but that would put a lot of pressure on the gc.
+The first optimisation we're doing to discuss is _escape analysis_. 
 
-However, the stack exists as a cheap place to store local variables; there is no need to garbage collect things on the stack.
+To illustrate what escape analysis does recall that the [Go spec][4] does not mention the heap or the stack. It only mentions that the language is garbage collected in the introduction, and gives no hints as to how this is to be achieved.
 
-In some languages, like C and C++, stack/heap allocation is manual, and a common cause of memory corruption bugs.
+A compliant Go implementation of the Go spec _could_ store every allocation on the heap. That would put a lot of pressure on the the garbage collector, but it is in no way incorrect -- for several years, gccgo had very limited support for escape analysis so could effectively be considered to be operating in this mode. 
 
-In Go, the compiler automatically moves local values to the heap if they live beyond the lifetime of the function call. It is said that the value  _escapes_ to the heap.
+However, a goroutine's stack exists as a cheap place to store local variables; there is no need to garbage collect things on the stack. Therefore, where it is safe to do so, an allocation placed on the stack will be more efficient.
 
-But the compiler can also do the opposite, it can find things which would be assumed to be allocated on the heap, `new`, `make`, etc, and move them to stack.
+In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer--heap allocations are made with `malloc` and `free`, stack allocation is via `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
+
+In Go, the compiler automatically moves a value to the heap if if lives beyond the lifetime of the function call. It is said that the value  _escapes_ to the heap.
+```
+type Foo struct {
+	a, b, c, d int
+}
+
+func NewFoo() *Foo {
+	return &Foo{a: 3, b: 1, c: 4, d: 7}
+}
+```
+In this example the `Foo` allocated in `NewFoo` will be moved to the heap so its contents remain valid after `NewFoo` has returned.
+
+This has been present since the earliest days of Go. It  isn't so much an optimisation as an automatic correctness feature. Accidentally returning the address of a stack allocated variable is not possible in Go.
+
+But the compiler can also do the opposite; it can find things which would be assumed to be allocated on the heap, and move them to stack.
 
 ## Escape analysis (example)
 
-Sum adds the ints between 1 and 100 and returns the result.
+Let's have a look at an example
+```go
+// Sum returns the sum of the numbers 1 to 100
+func Sum() int {
+        const count = 100
+        numbers := make([]int, count)
+        for i := range numbers {
+                numbers[i] = i + 1
+        }
 
-.code examples/esc/sum.go /START OMIT/,/END OMIT/
-.caption examples/esc/sum.go
+        var sum int
+        for _, i := range numbers {
+                sum += i
+        }
+        return sum
+}
+```
+`Sum` adds the `int`s between 1 and 100 and returns the result.
 
-Because the numbers slice is only referenced inside Sum, the compiler will arrange to store the 100 integers for that slice on the stack, rather than the heap. There is no need to garbage collect `numbers`, it is automatically free'd when `Sum` returns.
+Because the `numbers` slice is only referenced inside `Sum`, the compiler will arrange to store the 100 integers for that slice on the stack, rather than the heap. There is no need to garbage collect `numbers`, it is automatically freed when `Sum` returns.
 
 ## Investigating escape analysis
 
@@ -45,33 +73,71 @@ To print the compilers escape analysis decisions, use the `-m` flag.
 ```
 % go build -gcflags=-m examples/esc/sum.go
 # command-line-arguments
-examples/esc/sum.go:10: Sum make([]int, 100) does not escape
-examples/esc/sum.go:25: Sum() escapes to heap
-examples/esc/sum.go:25: main ... argument does not escape
+examples/esc/sum.go:8:17: Sum make([]int, count) does not escape
+examples/esc/sum.go:22:13: answer escapes to heap
+examples/esc/sum.go:22:13: main ... argument does not escape
 ```
-Line 10 shows the compiler has correctly deduced that the result of `make([]int, 100)` does not escape to the heap.
+Line 8 shows the compiler has correctly deduced that the result of `make([]int, 100)` does not escape to the heap. The reason it did no
 
-We'll come back to line 25 soon.
+The reason line 22 reports that `answer` escapes to the heap is `fmt.Println` is a _variadic_ function. The parameters to a variadic function are _boxed_ into a slice, in this case a `[]interface{}`, so `answer` is placed into a interface value because it is referenced by the call to `fmt.Println`. Since Go 1.6 (??) the garbage collector requires _all_ values passed via an interface to be pointers, what the complier sees is _approximately_:
+```
+var answer = Sum()
+fmt.Println([]interface{&answer}...)
+```
+We can confirm this using the `-gcflags="-m -m"` flag. Which returns
+```
+examples/esc/sum.go:22:13: answer escapes to heap
+examples/esc/sum.go:22:13:      from ... argument (arg to ...) at examples/esc/sum.go:22:13
+examples/esc/sum.go:22:13:      from *(... argument) (indirection) at examples/esc/sum.go:22:13
+examples/esc/sum.go:22:13:      from ... argument (passed to call[argument content escapes]) at examples/esc/sum.go:22:13
+examples/esc/sum.go:22:13: main ... argument does not escape
+```
+In short, don't worry about line 22, its not important to this discussion.
+### Execises
+
+- Does this optimisation hold true for all values of `count`?
+- Does this optimisation hold true if `count` is a variable, not a constant?
+- Does this optimisation hold true if `count` is a parameter to `Sum`?
 
 ## Escape analysis (example)
 
-This example is a little contrived.
+This example is a little contrived. It is not intended to be real code, just an example.
 
-.code examples/esc/center.go /START OMIT/,/END OMIT/
+```go
+package main
+
+import "fmt"
+
+type Point struct{ X, Y int }
+
+const Width = 640
+const Height = 480
+
+func Center(p *Point) {
+        p.X = Width / 2
+        p.Y = Height / 2
+}
+
+func NewPoint() {
+        p := new(Point)
+        Center(p)
+        fmt.Println(p.X, p.Y)
+}
+```
 
 `NewPoint` creates a new `*Point` value, `p`. We pass `p` to the `Center` function which moves the point to a position in the center of the screen. Finally we print the values of `p.X` and `p.Y`.
 
-## Escape analysis (example)
 ```
-% go build -gcflags=-m examples/esc/center.go 
+% go build -gcflags=-m examples/esc/center.go
 # command-line-arguments
-examples/esc/center.go:12: can inline Center
-examples/esc/center.go:19: inlining call to Center
-examples/esc/center.go:12: Center p does not escape
-examples/esc/center.go:20: p.X escapes to heap
-examples/esc/center.go:20: p.Y escapes to heap
-examples/esc/center.go:18: NewPoint new(Point) does not escape
-examples/esc/center.go:20: NewPoint ... argument does not escape
+examples/esc/center.go:10:6: can inline Center
+examples/esc/center.go:17:8: inlining call to Center
+examples/esc/center.go:10:13: Center p does not escape
+examples/esc/center.go:18:15: p.X escapes to heap
+examples/esc/center.go:18:20: p.Y escapes to heap
+examples/esc/center.go:16:10: NewPoint new(Point) does not escape
+examples/esc/center.go:18:13: NewPoint ... argument does not escape
+# command-line-arguments
 ```
 Even though `p` was allocated with the `new` function, it will not be stored on the heap, because no reference `p` escapes the `Center` function.
 
@@ -179,5 +245,8 @@ Investigate the operation of the following compiler functions:
 
 .link http://go-talks.appspot.com/github.com/rakyll/talks/gcinspect/talk.slide#1 Further reading: Codegen Inspection by Jaana Burcu Dogan
 
-
+[0]: https://www.goodreads.com/book/show/112269.Principles_of_Compiler_Design
 [1]: https://en.wikipedia.org/wiki/Static_single_assignment_form
+[2]: https://golang.org/doc/go1.5#c
+[3]: https://blog.golang.org/go1.7
+[4]: https://golang.org/ref/spec
