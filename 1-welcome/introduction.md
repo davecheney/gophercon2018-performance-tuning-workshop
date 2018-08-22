@@ -40,7 +40,7 @@ If computers are still getting faster then maybe we don’t need to care about t
 
 This is the classic data you’ll find in textbooks like *Computer Architecture, A Quantitative Approach* by John L. Hennessy and David A. Patterson. This graph was taken from the 5th edition
 
-![graph](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/graph.png)
+![graph](images/graph.png)
 
 Hennessey and Patterson argue that there are three eras
 
@@ -50,7 +50,7 @@ Hennessey and Patterson argue that there are three eras
 
 That previous graph only went up to 2012, but fortuntaly in 2012 [Jeff Preshing][0] wrote a [tool to scrape the Spec website and build your own graph][1].
 
-![int_graph-1345](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/int_graph-1345.png)
+![int_graph-1345](images/int_graph-1345.png)
 
 So this is the same graph using Spec data from 1995 til 2017.
 
@@ -80,7 +80,7 @@ Why does a CPU produce heat? It's a solid state device, there are no moving comp
 
 This digram is taken from a great [data sheet produced by TI][7]. In this model the switch in N typed devices is attracted to a positive voltage P type devices are repelled from a positive voltage.
 
-![cmos-inverter](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/cmos-inverter.png)
+![cmos-inverter](images/cmos-inverter.png)
 
 The power consumption of a CMOS device, which is what every transistor in this room, on your desk, and in your pocket, is made from, is combination of three factors.
 
@@ -94,7 +94,7 @@ To understand what happened next we need to look to a paper written in 1974 co-a
 
 So how did that work out?
 
-![power-density](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/0-welcome/images/power-density.png)
+![power-density](images/power-density.png)
 
 It turns out not so great. As the gate lenth of the transistor approaches the width of a few silicon atom, the relationship between transistor size, voltage, and importantly leakage broke down. 
 
