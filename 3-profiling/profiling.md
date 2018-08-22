@@ -1,6 +1,10 @@
 # Performance measurement and profiling
 
-In this section we'll use profiling tools built into Go to investigate the operation of the program from the inside.
+In the prevoius section we looked at benchmarking individual functions which is useful when you know ahead of time where the bottlekneck is. However, often you will find yourself in the position of asking
+
+> Why is this program taking so long to run?
+
+Profiling _whole_ programs which is useful for answering high level questions like. In this section we'll use profiling tools built into Go to investigate the operation of the program from the inside.
 
 ## pprof
 
