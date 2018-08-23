@@ -52,7 +52,7 @@ BenchmarkFib20-8           30000             44514 ns/op
 PASS
 ok      _/Users/dfc/devel/gophercon2018-performance-tuning-workshop/2-benchmarking/examples/fib 1.795s
 ```
-_Note_: `go test` will also run all the tests in a package before matching benchmarks, so if you have a lot of tests in a package, or they take a long time to run, you can exclude them by providing `go test`'s `-run` flag with a regex that matches nothing; ie. `go test -run=^$`.
+_Note_: `go test` will also run all the tests in a package before matching benchmarks, so if you have a lot of tests in a package, or they take a long time to run, you can exclude them by providing `go test`'s `-run` flag with a regex that matches nothing; ie. `go test -run=^$`. 
 
 ### How benchmarks work
 
@@ -144,7 +144,11 @@ ok      _/Users/dfc/devel/gophercon2018-performance-tuning-workshop/2-benchmarki
 name     time/op
 Fib20-8  44.3µs ± 6%
 ```
-`benchstat` tells us the mean is 44.3 microseconds with a +/- 6% variation across the samples. This is not unexpected on battery power. The first run is the slowest of all because the operating system had the CPU clocked down to save power. The next two runs are the fastest, because the operating system as decided that this isn't a transient spike of work and it has boosted up the clock speed to get through the work as quick as possible in the hope of being able to go back to sleep, then the remaining runs are the operating system and the bios trading power consumption for heat production.
+`benchstat` tells us the mean is 44.3 microseconds with a +/- 6% variation across the samples. This is not unexpected on battery power. 
+
+- The first run is the slowest of all because the operating system had the CPU clocked down to save power. 
+- The next two runs are the fastest, because the operating system as decided that this isn't a transient spike of work and it has boosted up the clock speed to get through the work as quick as possible in the hope of being able to go back to sleep.
+- The remaining runs are the operating system and the bios trading power consumption for heat production.
 
 ## Comparing benchmarks with benchstat
 
@@ -278,13 +282,33 @@ func BenchmarkPopcnt(b *testing.B) {
 ```
 On all versions of the Go compiler, the loop is still generated. But Intel CPUs are really good at optimising loops, especially empty ones. 
 
-### Optimisations are good
+### Optimisation is a good thing
 
-The thing to take away is the same optimisations that make real code fast, by removing unnecessary computation, are the same ones that remove benchmarks that have no observable side effects.
+The thing to take away is the same optimisations that _make real code fast_, by removing unnecessary computation, are the same ones that remove benchmarks that have no observable side effects.
 
-This issue was is only going to get more common as the Go compiler improves.
+This is only going to get more common as the Go compiler improves.
 
-DEMO: show how to fix popcnt
+### Fixing the benchmark
+
+To fix this benchmark we must ensure that the compiler cannot _prove_ that the body of `BenchmarkPopcnt` does not cause global state to change.
+```go
+var Result uint64
+
+func BenchmarkPopcnt(b *testing.B) {
+        var r uint64
+        for i := 0; i < b.N; i++ {
+                r = popcnt(uint64(i))
+        }
+        Result = r
+}
+```
+This is the recommended way to ensure the compiler cannot optimise away body of the loop.
+
+First we _use_ the result of calling `popcnt` by storing it in `r`. Second, because `r` is declared locally inside the scope of `BenchmarkPopcnt` once the benchmark is over, the result of `r` is never visible to another part of the program, so as the final act we assign the value of `r` to the package public variable `Result`. 
+
+Because `Result` is public the compiler cannot prove that another package importing this one will not be able to see the value of `Result` changing over time, hence it cannot optimise away any of the operations leading to its assignment.
+
+_Exercise_: What happens if we assign to `Result` directly? Does this affect the benchmark time?
 
 ## Benchmark mistakes
 
@@ -292,7 +316,19 @@ The `for` loop is crucial to the operation of the benchmark.
 
 Here are two incorrect benchmarks, can you explain what is wrong with them?
 
-.code examples/benchfib/wrong_test.go /START OMIT/,/END OMIT/
+```go
+func BenchmarkFibWrong(b *testing.B) {
+        Fib(b.N)
+}
+```
+
+```go
+func BenchmarkFibWrong2(b *testing.B) {
+        for n := 0; n < b.N; n++ {
+                Fib(n)
+        }
+}
+```
 
 ## Profiling benchmarks
 
@@ -304,10 +340,10 @@ The `testing` package has built in support for generating CPU, memory, and block
 
 Using any of these flags also preserves the binary.
 
-    % go test -run=XXX -bench=. -cpuprofile=c.p bytes
-    % go tool pprof bytes.test c.p
-
-_Note:_ use `-run=XXX` to disable tests, you only want to profile benchmarks. You can also use `-run=^$` to accomplish the same thing.
+```
+% go test -run=XXX -bench=. -cpuprofile=c.p bytes
+% go tool pprof c.p
+```
 
 ## Discussion
 
