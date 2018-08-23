@@ -157,6 +157,22 @@ func BenchmarkCountWhitespacePrideAndPrejudice(b *testing.B) {
 ```
 Run this benchmark against the various methods we've seen and see if the improvements demonstrated in our synthetic benchmarks hold true for a larger set of input data.
 
+### SetBytes
+Up to this point we've been talking about benchmark operations taking a certain number of nanoseconds per operation. This is usually a good default, but there are other ways of thinking about benchmark results, specifically in terms of throughput.
+
+The `testing.B` type supports this with the `SetBytes` method. If we add this line just below `b.ResetTime()`
+```go
+b.SetBytes(int64(len(buf)))
+```
+And run the test again, we see the result not only in some value of milliseconds, but also in the throughput in megabytes per second. 
+```
+% go test -bench=Pride
+goos: darwin
+goarch: amd64
+BenchmarkCountWhitespacePrideAndPrejudice-8         1000           2241360 ns/op         323.34 MB/s
+PASS
+```
+
 ## Taking this further
 
 In the example we are lucky because the input to `isSpace` is a byte. However, in Go, we talk in unicode `rune`s. 
