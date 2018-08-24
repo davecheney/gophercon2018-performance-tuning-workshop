@@ -5,24 +5,18 @@
 - David Cheney <dave@cheney.net>
 - Francesc Campoy <campoy@golang.org>
 
-
-
 ## Overview
 
-The goal for this workshop 
+The goal for this workshop is to give you the tools you need to diagnose performance problems in your Go applications and fix them.
 
-We will work upwards from the basics of profiling and benchmarking. 
-
-
-The general theme is to start from the smallest pieces, profiling a small piece of code, the write a benchmark to quantify the changes, take a small detour into escape analysis, inlining, as they are related to microbenchmarking. Then step out and talk about the execution tracer, including tracing running applications. The last two sections are really a grab back of advice, and tips.
-
+Through the day we'll work from the small -- learning how to write benchmarks, then profiling a small piece of code. Then step out and talk about the execution tracer, the garbage collector  and tracing running applications. The remainder of the day will be a chance for you to ask questions, experiement with your own code.
 
 ## Schedule (approximate)
 
 | Start | Description |
 | --- | --- |
 | 09:00 | [Welcome and introduction][1] |
-| 09:30 | [Benchmarking (francesc)][2] |
+| 09:30 | [Benchmarking (dfc)][2] |
 | 10:15 | Break (15 minutes) |
 | 10:30 | [Profiling (dfc)][3] |
 | 11:15 | [Compiler optimization (dfc)][4]|
@@ -38,12 +32,10 @@ The general theme is to start from the smallest pieces, profiling a small piece 
 
 ## License and Materials
 
-This presentation is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) licence.
-
-You are encouraged to remix, transform, or build upon the material, providing you give appropriate credit and distribute your contributions under the same license.
+This repository is licensed under the [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/) licence.
 
 [1]: 1-welcome/1-welcome.md
-[2]: 2-benchmarking/1-benchmarks.md
+[2]: 2-benchmarking/benchmarking.md
 [3]: 3-profiling/1-profiling.md
 [4]: 4-compiler-optimisation/1-compiler-optimisation.md
 [5]: 5-execution-tracer/1-execution-tracer.md
