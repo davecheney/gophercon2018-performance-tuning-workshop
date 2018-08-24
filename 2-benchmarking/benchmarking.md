@@ -225,13 +225,13 @@ func BenchmarkComplicated(b *testing.B) {
 Allocation count and size is strongly correlated with benchmark time. You can tell the `testing` framework to record the number of allocations made by code under test.
 ```go
 func BenchmarkRead(b *testing.B) {
-        b.ReportAllocs() // HL
+        b.ReportAllocs()
         for n := 0; n < b.N; n++ {
                 // function under test
         }
 }
 ```
-
+Here is an example funning
 DEMO: `go`test`-run=^$`-bench=.`bufio`
 
 _Note:_ you can also use the `go`test`-benchmem` flag to do the same for _all_ benchmarks.

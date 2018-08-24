@@ -8,7 +8,7 @@ This section covers three important optimisations that the Go compiler performs.
 
 ## History of the Go compiler
 
-The Go compiler started as a fork of the Plan9 compiler tool chain circa 2007. The compiler at that time bore a strong resemblence to Aho and Ullman's [_Dragon Book_][0].
+The Go compiler started as a fork of the Plan9 compiler tool chain circa 2007. The compiler at that time bore a strong resemblance to Aho and Ullman's [_Dragon Book_][0].
 
 In 2015 the then Go 1.5 compiler was mechanically translated from [C into Go][2].
 
@@ -79,7 +79,7 @@ examples/esc/sum.go:22:13: main ... argument does not escape
 ```
 Line 8 shows the compiler has correctly deduced that the result of `make([]int, 100)` does not escape to the heap. The reason it did no
 
-The reason line 22 reports that `answer` escapes to the heap is `fmt.Println` is a _variadic_ function. The parameters to a variadic function are _boxed_ into a slice, in this case a `[]interface{}`, so `answer` is placed into a interface value because it is referenced by the call to `fmt.Println`. Since Go 1.6 (??) the garbage collector requires _all_ values passed via an interface to be pointers, what the complier sees is _approximately_:
+The reason line 22 reports that `answer` escapes to the heap is `fmt.Println` is a _variadic_ function. The parameters to a variadic function are _boxed_ into a slice, in this case a `[]interface{}`, so `answer` is placed into a interface value because it is referenced by the call to `fmt.Println`. Since Go 1.6 (??) the garbage collector requires _all_ values passed via an interface to be pointers, what the compiler sees is _approximately_:
 ```
 var answer = Sum()
 fmt.Println([]interface{&answer}...)
@@ -93,7 +93,7 @@ examples/esc/sum.go:22:13:      from ... argument (passed to call[argument conte
 examples/esc/sum.go:22:13: main ... argument does not escape
 ```
 In short, don't worry about line 22, its not important to this discussion.
-### Execises
+### Exercises
 
 - Does this optimisation hold true for all values of `count`?
 - Does this optimisation hold true if `count` is a variable, not a constant?
@@ -146,12 +146,7 @@ Even though `p` was allocated with the `new` function, it will not be stored on 
  examples/esc/center.go:20: p.X escapes to heap
  examples/esc/center.go:20: p.Y escapes to heap
 
-.link https://github.com/golang/go/issues/7714 Escape analysis is not perfect
-
-## Exercise
-
-- What is happening on line 25? Open up `examples/esc/sum.go` and see.
-- Write a benchmark to provide that `Sum` does not allocate
+_Exercise_: Write a benchmark to provide that `Sum` does not allocate
 
 ## Inlining 
 
@@ -161,37 +156,86 @@ Some of this is ameliorated by hardware branch predictors, but it's still a cost
 
 Inlining is the classical optimisation to avoid these costs. 
 
-Inlining only works on _leaf_functions_, a function that does not call another. The justification for this is:
+Inlining only works on _leaf functions_, a function that does not call another. The justification for this is:
 
 - If your function does a lot of work, then the preamble overhead will be negligible. That's why functions over a certain size (currently some count of instructions, plus a few operations which prevent inlining all together (eg. switch before Go 1.7)
 - Small functions on the other hand pay a fixed overhead for a relatively small amount of useful work performed. These are the functions that inlining targets as they benefit the most. 
 
-The other reason is it makes stack traces harder to follow.
+The other reason is that heavy inlinging makes stack traces harder to follow. 
 
 ## Inlining (example)
 
-.play examples/max/max.go /START OMIT/,/END OMIT/
+```go
+func Max(a, b int) int {
+        if a > b {
+                return a
+        }
+        return b
+}
 
-## Inlining (cont.)
-
-Again we use the `-m` flag to view the compilers optimisation decision.
+func F() {
+        const a, b = 100, 20
+        if Max(a, b) == b {
+                panic(b)
+        }
+}
 ```
-% go build -gcflags=-m examples/max/max.go 
+Again we use the `-gcflags=-m` flag to view the compilers optimisation decision.
+```
+% go build -gcflags=-m examples/max/max.go
 # command-line-arguments
-examples/max/max.go:4: can inline Max
-examples/max/max.go:13: inlining call to Max
+examples/max/max.go:3:6: can inline Max
+examples/max/max.go:12:8: inlining call to Max
 ```
+The compiler printed two lines. 
+
+- The first at line 3, the declaration of `Max`, telling us that it can be inlined.
+- The second is reporting that the body of `Max` has been inlined into the caller at line 12.
+
+_Exercise_: _Without_ using the `//go:noinline` comment, rewrite `Max` such that it still returns the right answer, but is no longer considered inlineable by the compiler.
+
+### What does inlining look like?
+
 Compile `max.go` and see what the optimised version of `F()` became.
+```
+% go build -gcflags=-S examples/max/max.go 2>&1 | grep -A5 '"".F STEXT'
+"".F STEXT nosplit size=1 args=0x0 locals=0x0
+        0x0000 00000 (/Users/dfc/devel/gophercon2018-performance-tuning-workshop/4-compiler-optimisations/examples/max/max.go:10)       TEXT    "".F(SB), NOSPLIT, $0-0
+        0x0000 00000 (/Users/dfc/devel/gophercon2018-performance-tuning-workshop/4-compiler-optimisations/examples/max/max.go:10)       FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x0000 00000 (/Users/dfc/devel/gophercon2018-performance-tuning-workshop/4-compiler-optimisations/examples/max/max.go:10)       FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x0000 00000 (<unknown line number>)    RET
+        0x0000 c3
+```
+This is the body of `F` once `Max` has been inlined into it -- there's nothing happening in this function. I know there's a lot of text on the screen for nothing, but take my word for it, the only  thing hapening is the `RET`. In effect `F` became:
+```go
+func F() {
+        return
+}
+```
 
-DEMO: `go`build`-gcflags="-m`-S"`examples/max/max.go`2>&1`|`less`
+_Note_: The output from `-S` is not the final machine code that goes into your binary. The linker does some processing during the final link stage. Lines like `FUNCDATA` and `PCDATA` are metadata for the garbage collector which are moved elsewhere when linking. If you're reading the output of `-S`, just ignore `FUNCDATA` and `PCDATA` lines; they're not part of the final binary.
 
-## Discussion
+### Discussion
 
-- Why did I declare `a` and `b` in `F()` to be constants?
-- What happens if they are variables?
-- What happens if they are passing into `F()` as parameters?
+Why did I declare `a` and `b` in `F()` to be constants?
 
-## Inlining future
+_Exercise_: Experiment with the output of What happens if `a` and `b` are declared as  are variables?  What happens if `a` and `b` are passing into `F()` as parameters?
+
+_Note_: `-gcflags=-S` doesn't prevent the final binary being build in your working directory. If you find that subsiquent runs of `go build ...` produce no output, delete the `./max` binary in your working directory.
+
+### Adjusting the level of inlining
+
+Adjusting the _inlining level_ is performed with the `-gcflags=-l` flag. Somewhat confusingly passing a single `-l` will disable inlining, and two or more will enable inlining at more aggressive settings.
+
+- `-gcflags=-l`, inlining disabled
+- nothing, regular inlining.
+- `-gcflags='-l -l'` inlining level 2, more aggressive, might be faster, may make bigger binaries
+- `-gcflags='-l -l -l'` inlining level 3, more agressive again, binaries defininitely bigger, maybe faster again, but might also be buggy.
+- `-gcflags=-l=4` (four `-l`s) in Go 1.11 will enable the experimental [_mid stack_ inlining optimisation][5].
+
+### Inlining future (Go 1.12)
+
+We're using Go 1.10 for this workshop. A bunch of work happened under the hood for 1.11, but the rules around what is inlined and when have not changed substantively with one exception
 
 A lot of what we've discussed with respect to leaf functions _may_ change in a future release of Go.
 
@@ -205,18 +249,92 @@ As a Go programmer, this should not be a cause for alarm, mid-
 
 Why is it important that `a` and `b` are constants?
 
-After inlining, this is what the compiler saw
+To understand what happened lets look at what the compiler sees once its inlined `Max` into `F`. We can't get this from the compiler easily, but it's straight forward to do it by hand.
 
-.play examples/max/max2.go /START OMIT/,/END OMIT/
+Before:
+```go
+func Max(a, b int) int {
+        if a > b {
+                return a
+        }
+        return b
+}
 
-- The call to `Max` has been inlined.
-- If `a`>`b` then there is nothing to do, so the function returns. 
-- If `a`<`b` then the branch is false and we fall through to `panic`
-- But, because `a` and `b` are constants, we know that the branch will never be false, so the compiler can optimise `F()` to a return.
+func F() {
+        const a, b = 100, 20
+        if Max(a, b) == b {
+                panic(b)
+        }
+}
+```
+After:
+```go
+func F() {
+        const a, b = 100, 20
+        var result int
+        if a > b {
+                result = a
+        } else {
+                result = b
+        }
+        if result == b {
+                panic(b) 
+        }
+}
+```
+Because `a` and `b` are constants the compiler can prove at compile time that the branch will never be false; `100` is always greater than `20`. So it can further optimise `F` to 
+```go
+func F() {
+        const a, b = 100, 20
+        var result int
+        if true {
+                result = a
+        } else {
+                result = b
+        }
+        if result == b {
+                panic(b) 
+        }
+}
+```
+Now that the result of the branch is know then then the contents of `result` are also known. This is call _branch elimination_.
+```go
+func F() {
+        const a, b = 100, 20
+        const result = a
+        if result == b {
+                panic(b) 
+        }
+}
+```
+Now the branch is eliminated we know that `result` is always equal to `a`, and because `a` was a constant, we know that `result` is a constant. The compiler applies this proof to the second branch
+```go
+func F() {
+        const a, b = 100, 20
+        const result = a
+        if false {
+                panic(b) 
+        }
+}
+```
+And using branch elimination again the final form of `F` is reduced to.
+```go
+func F() {
+        const a, b = 100, 20
+        const result = a
+}
+```
+And finally just
+```go
+func F() {
+}
+```
 
-## Dead code elimination (cont.)
+### Dead code elimination (cont.)
 
-Dead code elimination work together with inlining to reduce the amount of code generated by removing loops and branches that are proven unreachable.
+Branch elimination is one of a category of optimisations known as _dead code elimination_. In effect, using static proofs to show that a piece of code is never reachable, colloqually known as _dead_, therefore it need not be compiled, optimised, or emitted in the final binary.
+
+We saw out dead code elimination works together with inlining to reduce the amount of code generated by removing loops and branches that are proven unreachable.
 
 You can take advantage of this to implement expensive debugging, and hide it behind
 ```
@@ -224,10 +342,10 @@ const debug = false
 ```
 Combined with build tags this can be very useful.
 
-Further reading:
+### Further reading
 
-.link http://dave.cheney.net/2014/09/28/using-build-to-switch-between-debug-and-release Using // +build to switch between debug and release builds
-.link http://dave.cheney.net/2013/10/12/how-to-use-conditional-compilation-with-the-go-build-tool How to use conditional compilation with the go build tool
+- [Using // +build to switch between debug and release builds][7]
+- [How to use conditional compilation with the go build tool][8]
 
 ### Compiler flags Exercises
 
@@ -239,14 +357,23 @@ go build -gcflags=$FLAGS
 Investigate the operation of the following compiler functions:
 
 - `-S` prints the (Go flavoured) assembly of the _package_ being compiled.
-- `-l` controls the behaviour of the inliner; `-l` disables inlining, `-l`-l` increases it (more `-l` 's increases the compiler's appetite for inlining code). Experiment with the difference in compile time, program size, and run time.
+- `-l` controls the behaviour of the inliner; `-l` disables inlining, `-l -l` increases it (more `-l` 's increases the compiler's appetite for inlining code). Experiment with the difference in compile time, program size, and run time.
 - `-m` controls printing of optimisation decision like inlining, escape analysis. `-m`-m` prints more details about what the compiler was thinking.
 - `-l`-N` disables all optimisations.
 
-.link http://go-talks.appspot.com/github.com/rakyll/talks/gcinspect/talk.slide#1 Further reading: Codegen Inspection by Jaana Burcu Dogan
+_Note_: If you find that subsiquent runs of `go build ...` produce no output, delete the `./max` binary in your working directory.
+
+### Futher reading
+
+- [Codegen Inspection by Jaana Burcu Dogan][6]
+
 
 [0]: https://www.goodreads.com/book/show/112269.Principles_of_Compiler_Design
 [1]: https://en.wikipedia.org/wiki/Static_single_assignment_form
 [2]: https://golang.org/doc/go1.5#c
 [3]: https://blog.golang.org/go1.7
 [4]: https://golang.org/ref/spec
+[5]: https://github.com/golang/go/issues/19348#issuecomment-393654429
+[6]: http://go-talks.appspot.com/github.com/rakyll/talks/gcinspect/talk.slide#1
+[7]: http://dave.cheney.net/2014/09/28/using-build-to-switch-between-debug-and-release 
+[8]: http://dave.cheney.net/2013/10/12/how-to-use-conditional-compilation-with-the-go-build-tool 

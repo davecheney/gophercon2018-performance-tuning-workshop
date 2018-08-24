@@ -1,6 +1,5 @@
 package main
 
-// START OMIT
 func Max(a, b int) int {
 	if a > b {
 		return a
@@ -14,8 +13,6 @@ func F() {
 		panic(b)
 	}
 }
-
-// END OMIT
 
 func main() {
 	F()
