@@ -30,13 +30,13 @@ Shorter code is _smaller_ code; which is important for the CPU's cache.
 
 > If a program is too slow, it must have a loop -- Ken Thompson
 
-When the number of elemen
+Most programs perform well with small amounts of data.
 
+I'm a big fan of metrics, rather than testing with 
 
+Limit the communication and points of co-ordination between the parts of your program to ride Ahmdawls law.
 
-Limit the communication and points of co-ordination between the parts of your program to ride Ahmdawls law
-
-Performance rule of thumb:
+## Performance rule of thumb:
 
 Network/disk io >> allocations >> function calls
 
