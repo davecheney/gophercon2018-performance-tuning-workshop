@@ -264,27 +264,86 @@ By inserting a `bufio.Reader` between the input file and `readbyte` will
 
 _Exercise_: Compare the times of this revised program to `wc`. How close is it? Take a profile and see what remains.
 
-
 ## Memory profiling
 
-The output of a memory profile can be similarly visualised.
+The new `words` profile suggests that something is allocating inside the `readbyte` function. We can use pprof to investigate.
+```go
+defer profile.Start(profile.MemProfile).Stop()
+```
+Then run the program as usual
+```
+% go run main2.go moby.txt
+2018/08/25 14:41:15 profile: memory profiling enabled (rate 4096), /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
+"moby.txt": 181275 words
+2018/08/25 14:41:15 profile: memory profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
+```
 
-    % go build -gcflags='-memprofile=/tmp/m.p'
-    % go tool pprof --alloc_objects -svg $(go tool -n compile) /tmp/m.p > alloc_objects.svg
-    % go tool pprof --inuse_objects -svg $(go tool -n compile) /tmp/m.p > inuse_objects.svg
+![memprof](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/3-profiling/images/memprof.png)
 
-Memory profiles come in two varieties
+As we suspected the allocation was coming from `readbyte` -- this wasn't that complicated, readbyte is three lines long:
+```go
+func readbyte(r io.Reader) (rune, error) {
+        var buf [1]byte // allocation is here
+        _, err := r.Read(buf[:])
+        return rune(buf[0]), err
+}
+```
+We'll talk about why this is happening in more detail in the next section, but for the moment what we see is every call to readbyte is allocating a new one byte long _array_ and that array is being allocated on the heap.
 
-- Alloc objects reports the call site where each allocation was made
+_Exercise_: What are some ways we can avoid this? Try them and use CPU and memory profiling to prove it.
 
-!(allocated objects)[images/alloc_objects.svg]
+### Alloc objects vs. inuse objects
 
-- Inuse objects reports the call site where an allocation was made _iff_ it was reachable at the end of the profile
+Memory profiles come in two varieties, named after their `go tool pprof` flags
 
-.link images/inuse_objects.svg
+- `-alloc_objects` reports the call site where each allocation was made
+- `-inuse_objects` reports the call site where an allocation was made _iff_ it was reachable at the end of the profile
 
-DEMO: `examples/inuseallocs`
+To demonstrate this, here is a contrived program which will allocate a bunch of memory in a controlled manner.
+```go
+// ensure y is live beyond the end of main.
+var y []byte
 
+func main() {
+        defer profile.Start(profile.MemProfile, profile.MemProfileRate(1)).Stop()
+        y = allocate(100000)
+        runtime.GC()
+}
+
+// allocate allocates count byte slices and returns the first slice allocated.
+func allocate(count int) []byte {
+        var x [][]byte
+        for i := 0; i < count; i++ {
+                x = append(x, makeByteSlice())
+        }
+        return x[0]
+}
+
+// makeByteSlice returns a byte slice of a random length in the range [0, 16384).
+func makeByteSlice() []byte {
+        return make([]byte, rand.Intn(1<<14))
+}
+```
+The program is annotation with the `profile` package, and we set the memory profile rate  to `1`--that is, record a stack trace for every allocation. This is slows down the program a lot, but you'll see why in a minute.
+```
+% go run main.go
+2018/08/25 15:22:05 profile: memory profiling enabled (rate 1), /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile730812803/mem.pprof
+2018/08/25 15:22:05 profile: memory profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile730812803/mem.pprof
+```
+Lets look at the graph of allocated objects, this is the default, and shows the call graphs that lead to the allocation of every object during the profile.
+```
+% go tool pprof -web -alloc_objects /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
+```
+
+![alloc_objects](images/alloc_objects.png)
+
+Not surprisingly more than 99% of the allocations were inside `makeByteSlice`. Now lets look at the same profile using `-inuse_objects`
+```
+% go tool pprof -web -inuse_objects /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
+```
+
+![inuse_objects](images/inuse_objects.png)
+What we see is not the objects that were _allocated_ during the profile, but the objects that remain _in use_, at the time the profile was taken -- this ignores the stack trace for objects which have been reclaimed by the garbage collector.
 ## Block profiling (example)
 
 Here is a visualisation of a block profile:
