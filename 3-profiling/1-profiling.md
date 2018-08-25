@@ -350,7 +350,7 @@ The last profile type we'll look at is block profiling. We'll use the `ClientSer
 % go tool pprof -web /tmp/block.p
 ```
 
-![blockprof](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/3-profiling/images/blockprof.png)
+![blockprof](images/blockprof.png)
 
 ## Framepointers
 
