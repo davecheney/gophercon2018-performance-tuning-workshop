@@ -1,10 +1,40 @@
 # Tips and Tricks
 
-This final section contains a number of tips to micro optimise Go code.
+This final section contains a number of tips to optimise Go code.
 
-The key feature of Go that makes it a great fit for modern hardware are goroutines.
+## Reduce allocations
 
-Goroutines are so easy to use, and so cheap to create, you could think of them as _almost_ free.
+Make sure your APIs allow the caller to reduce the amount of garbage generated.
+
+Consider these two Read methods
+```go
+func (r *Reader) Read() ([]byte, error)
+func (r *Reader) Read(buf []byte) (int, error)
+```
+
+The first Read method takes no arguments and returns some data as a `[]byte`. The second takes a `[]byte` buffer and returns the amount of bytes read.
+
+The first Read method will _always_ allocate a buffer, putting pressure on the GC. The second fills the buffer it was given.
+
+_Exercise_: Can you name examples in the std lib which follow this pattern?
+
+## strings vs []bytes
+
+In Go `string` values are immutable, `[]byte` are mutable.
+
+Most programs prefer to work `string`, but most IO is done with `[]byte`.
+
+Avoid `[]byte` to string conversions wherever possible, this normally means picking one representation, either a `string` or a `[]byte` for a value. Often this will be `[]byte` if you read the data from the network or disk.
+
+The [`bytes`][2] package contains many of the same operations— `Split`, `Compare`, `HasPrefix`, `Trim`, etc—as the [`strings`][3] package.
+
+Under the hood `strings` uses same assembly primitives as the `bytes` package.
+
+
+
+## Goroutines
+
+The key feature of Go that makes it a great fit for modern hardware are goroutines. Goroutines are so easy to use, and so cheap to create, you could think of them as _almost_ free.
 
 The Go runtime has been written for programs with tens of thousands of goroutines as the norm, hundreds of thousands are not unexpected.
 
@@ -12,13 +42,13 @@ However, each goroutine does consume a minimum amount of memory for the goroutin
 
 2048 * 1,000,000 goroutines == 2GB of memory, and they haven't done anything yet.
 
- Maybe this is a lot, maybe it isn't given the other usages of your application
+Maybe this is a lot, maybe it isn't, given the other consumers of memory in your application. 
 
-# Know when to stop a goroutine
+## Know when a goroutine is going to stop
 
 Goroutines are cheap to start and cheap to run, but they do have a finite cost in terms of memory footprint; you cannot create an infinite number of them.
 
-Every time you use the `go` keyword in your program to launch a goroutine, you must *know* how, and when, that goroutine will exit.
+Every time you use the `go` keyword in your program to launch a goroutine, you must _know_ how, and when, that goroutine will exit.
 
 If you don't know the answer, that's a potential memory leak.
 
@@ -26,14 +56,16 @@ In your design, some goroutines may run until the program exits. These goroutine
 
 **Never start a goroutine without knowing how it will stop**
 
-.link https://www.youtube.com/watch?v=yKQOunhhf4A&index=16&list=PLq2Nv-Sh8EbZEjZdPLaQt1qh_ohZFMDj8 Concurrency Made Easy (video)
-.link https://dave.cheney.net/paste/concurrency-made-easy.pdf Concurrency Made Easy (slides)
+### Further reading
+
+- [Concurrency Made Easy][0] (video)
+- [Concurrency Made Easy][1] (slides)
 
 ## Go uses efficient network polling for some requests
 
 The Go runtime handles network IO using an efficient operating system polling mechanism (kqueue, epoll, windows IOCP, etc). Many waiting goroutines will be serviced by a single operating system thread.
 
-However, for local file IO, Go does not implement any IO polling. Each operation on a `*os.File` consumes one operating system thread while in progress.
+However, for local file IO--_with the exception of pipes_--Go does not implement any IO polling. Each operation on a `*os.File` consumes one operating system thread while in progress.
 
 Heavy use of local file IO can cause your program to spawn hundreds or thousands of threads; possibly more than your operating system allows.
 
@@ -50,7 +82,7 @@ Most server programs take a request, do some processing, then return a result. T
 
 If memory is slow, relatively speaking, then IO is so slow that you should avoid doing it at all costs. Most importantly avoid doing IO in the context of a request—don't make the user wait for your disk subsystem to write to disk, or even read.
 
-* Use streaming IO interfaces
+## Use streaming IO interfaces
 
 Where-ever possible avoid reading data into a `[]byte` and passing it around. 
 
@@ -67,12 +99,19 @@ Never start an IO operating without knowing the maximum time it will take.
 You need to set a timeout on every network request you make with `SetDeadline`, `SetReadDeadline`, `SetWriteDeadline`.
 
 You need to limit the amount of blocking IO you issue. Use a pool of worker goroutines, or a buffered channel as a semaphore.
+```go
+var semaphore = make(chan struct{}, 10)
 
-.code examples/semaphore.go /START OMIT/,/END OMIT/
+func processRequest(work *Work) {
+        semaphore <- struct{}{} // acquire semaphore
+        // process request
+        <-semaphore // release semaphore
+}
+```
 
 ## Defer is expensive, or is it?
 
-`defer` is expensive because it has to record a closure for defer's arguments.
+`defer` has a cost because it has to record a closure for its arguments.
 ```
 defer mu.Unlock()
 ```
@@ -146,3 +185,7 @@ Old version of Go receive no updates. Do not use them. Use the latest and you wi
 
 Any questions?
 
+[0]: https://www.youtube.com/watch?v=yKQOunhhf4A&index=16&list=PLq2Nv-Sh8EbZEjZdPLaQt1qh_ohZFMDj8
+[1]: https://dave.cheney.net/paste/concurrency-made-easy.pdf
+[2]: https://golang.org/pkg/bytes
+[3]: https://golang.org/pkg/strings

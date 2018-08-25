@@ -173,7 +173,7 @@ func Fib(n int) int {
         case 1:
                 return 1
         case 2:
-                return 2
+                return 1
         default:
                 return Fib(n-1) + Fib(n-2)
         }
