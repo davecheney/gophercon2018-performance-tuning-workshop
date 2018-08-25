@@ -334,30 +334,23 @@ Lets look at the graph of allocated objects, this is the default, and shows the 
 ```
 % go tool pprof -web -alloc_objects /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
 ```
-
 ![alloc_objects](images/alloc_objects.png)
-
 Not surprisingly more than 99% of the allocations were inside `makeByteSlice`. Now lets look at the same profile using `-inuse_objects`
 ```
 % go tool pprof -web -inuse_objects /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile891268605/mem.pprof
 ```
-
 ![inuse_objects](images/inuse_objects.png)
 What we see is not the objects that were _allocated_ during the profile, but the objects that remain _in use_, at the time the profile was taken -- this ignores the stack trace for objects which have been reclaimed by the garbage collector.
+
 ## Block profiling (example)
+The last profile type we'll look at is block profiling. We'll use the `ClientServer` benchmark from the `net/http` package 
 
-Here is a visualisation of a block profile:
 ```
-% go test -run=XXX -bench=ClientServer -blockprofile=/tmp/b.p net/http
-% go tool pprof -svg http.test /tmp/b.p > block.svg
+% go test -run=XXX -bench=ClientServer$ -blockprofile=/tmp/block.p net/http
+% go tool pprof -web /tmp/block.p
 ```
-![block profile](images/block.svg) 
 
-## Exercise
-
-- Generate a profile from a piece of code you know well. If you don't have a code sample, try profiling `godoc`.
-
-- If you were to generate a profile on one machine and inspect it on another, how would you do it?
+![blockprof](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/3-profiling/images/blockprof.png)
 
 ## Framepointers
 
@@ -369,23 +362,21 @@ Framepointers enable tools like `gdb(1)`, and `perf(1)` to understand the Go cal
 
 We won't cover these tools in this workshop, but you can read and watch a presentation I gave on seven different ways to profile Go programs.
 
+## Further reading:
+
+- Seven ways to profile a Go program (slides)[https://talks.godoc.org/github.com/davecheney/presentations/seven.slide]
+- Seven ways to profile a Go program(video, 30 mins)[https://www.youtube.com/watch?v=2h_NFBFrciI]
+- Seven ways to profile a Go program (webcast, 60 mins)[ https://www.bigmarker.com/remote-meetup-go/Seven-ways-to-profile-a-Go-program]
+
 ## Exercise
 
-Add profiling to an application.
-
-If you don't have a piece of code that you are able to experiment on, you can use the source to godoc
+Add profiling to an application. If you don't have a piece of code that you are able to experiment on, you can use the source to godoc
 
 ```
 % go get golang.org/x/tools/cmd/godoc
 % cd $GOPATH/src/golang.org/x/tools/cmd/godoc
 % vim main.go
 ```
-
-## Further reading:
-
-- Seven ways to profile a Go program (slides)[https://talks.godoc.org/github.com/davecheney/presentations/seven.slide]
-- Seven ways to profile a Go program(video, 30 mins)[https://www.youtube.com/watch?v=2h_NFBFrciI]
-- Seven ways to profile a Go program (webcast, 60 mins)[ https://www.bigmarker.com/remote-meetup-go/Seven-ways-to-profile-a-Go-program]
 
 [0]: https://github.com/pkg/profile
 [1]: https://github.com/google/pprof
