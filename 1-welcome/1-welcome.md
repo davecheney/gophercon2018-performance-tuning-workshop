@@ -16,7 +16,7 @@ The workshop material targets Go 1.10.
 
 [**Download Go 1.10.3**][0]
 
-_Note_: Although there is a strong chance Go 1.11 will have shipped by Gophercon, we're sticking to Go 1.10. If you want to use Go 1.11, you'll have to do the translations in your head.
+_Note_: If you've already upgraded to Go 1.11 that's ok. There are always some small changes to optimisation choices between minor Go releases but there's nothing substantially different between Go 1.10 and Go 1.11.
 
 ### Graphviz
 
