@@ -194,13 +194,75 @@ func main() {
 Now when we run the program a `cpu.pprof` file is created.
 ```
 % go run main.go moby.txt
-2018/08/18 15:46:05 profile: cpu profiling enabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile309242028/cpu.pprof
+2018/08/25 14:09:01 profile: cpu profiling enabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
 "moby.txt": 181275 words
-2018/08/18 15:46:07 profile: cpu profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile309242028/cpu.pprof
+2018/08/25 14:09:03 profile: cpu profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
 ```
-#### Extra credit
+Now we have the profile we can analyse it with `go tool pprof`
+```
+% go tool pprof /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile239941020/cpu.pprof
+Type: cpu
+Time: Aug 25, 2018 at 2:09pm (AEST)
+Duration: 2.05s, Total samples = 1.36s (66.29%)
+Entering interactive mode (type "help" for commands, "o" for options)
+(pprof) top
+Showing nodes accounting for 1.42s, 100% of 1.42s total
+      flat  flat%   sum%        cum   cum%
+     1.41s 99.30% 99.30%      1.41s 99.30%  syscall.Syscall
+     0.01s   0.7%   100%      1.42s   100%  main.readbyte
+         0     0%   100%      1.41s 99.30%  internal/poll.(*FD).Read
+         0     0%   100%      1.42s   100%  main.main
+         0     0%   100%      1.41s 99.30%  os.(*File).Read
+         0     0%   100%      1.41s 99.30%  os.(*File).read
+         0     0%   100%      1.42s   100%  runtime.main
+         0     0%   100%      1.41s 99.30%  syscall.Read
+         0     0%   100%      1.41s 99.30%  syscall.read
+```
+The `top` command is one you'll use the most. We can see that 99% of the time this program spends in `syscall.Syscall`, and a small part in `main.readbyte`. 
 
-Why did I use a large piece of text to benchmark my code?
+We can also visualise this call the with the `web` command. This will generate a directed graph from the profile data. Under the hood this uses the `dot` command from Graphviz.
+
+![pprof](images/pprof.png)
+
+On the graph the box that consumes the _most_ CPU time is the largest -- we see `sys call.Syscall` at 99.3% of the total time spent in the program. The string of boxes leading to `syscall.Syscall` represent the immediate callers -- there can be more than one if multiple code paths converge on the same function. The size of the arrow represents how much time was spent in children of a box, we see that from `main.readbyte` onwards they account for near 0 of the 1.41 second spent in this arm of the graph.
+
+_Question_: Can anyone guess why our version is so much slower than `wc`?
+
+### Improving our version
+
+The reason our program is slow is not because Go's `syscall.Syscall` is slow. It is because syscalls in general are expensive operations (and getting more expensive as more Spectre family vulnerabilities are discovered).
+
+Each call to `readbyte` results in a syscall.Read with a buffer size of 1. So the number of syscalls executed by our program is equal to the size of the input. We can see that in the pprof graph that reading the input dominates everything else.
+```go
+func main() {
+        f, err := os.Open(os.Args[1])
+        if err != nil {
+                log.Fatalf("could not open file %q: %v", os.Args[1], err)
+        }
+
+        b := bufio.NewReader(f)
+        words := 0
+        inword := false
+        for {
+                r, err := readbyte(b)
+                if err == io.EOF {
+                        break
+                }
+                if err != nil {
+                        log.Fatalf("could not read file %q: %v", os.Args[1], err)
+                }
+                if unicode.IsSpace(r) && inword {
+                        words++
+                        inword = false
+                }
+                inword = unicode.IsLetter(r)
+        }
+        fmt.Printf("%q: %d words\n", os.Args[1], words)
+}
+```
+By inserting a `bufio.Reader` between the input file and `readbyte` will 
+
+_Exercise_: Compare the times of this revised program to `wc`. How close is it? Take a profile and see what remains.
 
 
 ## Memory profiling
