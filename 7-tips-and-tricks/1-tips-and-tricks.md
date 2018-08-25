@@ -30,7 +30,90 @@ The [`bytes`][2] package contains many of the same operations— `Split`, `Compa
 
 Under the hood `strings` uses same assembly primitives as the `bytes` package.
 
+## Using []byte as a map key
 
+It is very common to use a `string` as a map key, but often you have a `[]byte`.
+
+The compiler implements a specific optimisation for this case
+```go
+var m map[string]string
+v, ok := m[string(bytes)]
+```
+
+This will avoid the conversion of the byte slice to a string for the map lookup. This is very specific, it won't work if you do something like
+```go
+key := string(bytes)
+val, ok := m[key]
+```
+## Optimise string concatenation
+
+Go strings are immutable. Concatenating two strings generates a third. Which of the following is fastest?
+```go
+s := request.ID
+s += " " + client.Addr().String()
+s += " " + time.Now().String()
+r = s
+```
+
+```go
+var b bytes.Buffer
+fmt.Fprintf(&b, "%s %v %v", request.ID, client.Addr(), time.Now())
+r = b.String()
+```
+
+```go
+r = fmt.Sprintf("%s %v %v", request.ID, client.Addr(), time.Now())
+```
+
+```go
+b := make([]byte, 0, 40)
+b = append(b, request.ID...)
+b = append(b, ' ')
+b = append(b, client.Addr().String()...)
+b = append(b, ' ')
+b = time.Now().AppendFormat(b, "2006-01-02 15:04:05.999999999 -0700 MST")
+r = string(b)
+```
+
+```
+% go test -bench=. ./examples/concat/
+```
+
+## Preallocate slices if the length is known
+
+Append is convenient, but wasteful.
+
+Slices grow by doubling up to 1024 elements, then by approximately 25% after that. What is the capacity of `b` after we append one more item to it?
+```go
+func main() {
+        b := make([]int, 1024)
+        b = append(b, 99)
+        fmt.Println("len:", len(b), "cap:", cap(b))
+}
+```
+If you use the append pattern you could be copying a lot of data and creating a lot of garbage.
+
+If know know the length of the slice beforehand, then pre-allocate the target to avoid copying and to make sure the target is exactly the right size.
+
+_Before:_
+```go
+var s []string
+for _, v := range fn() {
+        s = append(s, v)
+}
+return s
+```
+_After:_
+```go
+vals := fn()
+s := make([]string, len(vals))
+for i, v := range vals {
+        s[i] = v
+}
+return s
+```
+
+_Exercise_: write a benchmark to see which is faster.
 
 ## Goroutines
 
