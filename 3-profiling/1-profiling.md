@@ -1,10 +1,14 @@
 # Performance measurement and profiling
 
-In this section we'll use profiling tools built into Go to investigate the operation of the program from the inside.
+In the prevoius section we looked at benchmarking individual functions which is useful when you know ahead of time where the bottlekneck is. However, often you will find yourself in the position of asking
+
+> Why is this program taking so long to run?
+
+Profiling _whole_ programs which is useful for answering high level questions like. In this section we'll use profiling tools built into Go to investigate the operation of the program from the inside.
 
 ## pprof
 
-The first tool we're going to be talking about today is _pprof_. (pprof)[https://github.com/google/pprof] descends from the (Google Perf Tools)[[https://github.com/gperftools/gperftools] suite of tools and has been integrated into the Go runtime since the initial public release.
+The first tool we're going to be talking about today is _pprof_. [pprof][1] descends from the [Google Perf Tools][2] suite of tools and has been integrated into the Go runtime since the earliest public releases.
 
 `pprof`  consists of two parts:
 
@@ -70,17 +74,17 @@ Profiling has a moderate, but measurable impact on program performance—especia
 
 Most tools will not stop you from enabling multiple profiles at once.
 
-If you enable multiple profile's at the same time, they will observe their own interactions and throw off your results.
-
 **Do not enable more than one kind of profile at a time.**
+
+If you enable multiple profile's at the same time, they will observe their own interactions and throw off your results.
 
 ## Collecting a profile
 
-The Go runtime's profiling interface is in the `runtime/pprof` package.
+The Go runtime's profiling interface lives in the `runtime/pprof` package. `runtime/pprof` is a very low level tool, and for historic reasons the interfaces to the different kinds of profile are not uniform. 
 
-`runtime/pprof` is a very low level tool, and for historic reasons the interfaces to the different kinds of profile are not uniform.
+As we saw in the previous section, pprof profiling is built into the `testing` package, but sometimes its inconvenient, or difficult, to place the code you want to profile in the context of at `testing.B` benchmark and must use the `runtime/pprof` API directly.
 
-A few years ago I wrote a small package, [https://github.com/pkg/profile], to make it easier to profile an application.
+A few years ago I wrote a [small package][0], to make it easier to profile an existing application.
 
 ```
 import "github.com/pkg/profile"
@@ -90,9 +94,9 @@ func main() {
 	...
 }
 ```
-We'll use the profile package throughout this workshop, but feel free to ask me in a break to demonstrate how to use the `runtime/pprof` interface directly.
+We'll use the profile package throughout this section. Later in the day we'll touch on using the `runtime/pprof` interface directly.
 
-## Using pprof
+### Using pprof
 
 Now that we've talked about what pprof can measure, and how to generate a profile, let's talk about how to use pprof to analyse a profile.
 
@@ -101,12 +105,12 @@ The analysis is driven by the `go pprof` subcommand
 go tool pprof /path/to/your/profile
 ```
 
-_Note_: Since Go 1.9 the profile file contains all the information needed to render the profile. You do no longer need the binary which produced the profile. 🎉
+_Note_: If you've been using Go for a while, you might have been told that `pprof` takes two arguments. Since Go 1.9 the profile file contains all the information needed to render the profile. You do no longer need the binary which produced the profile. 🎉
 
 #### Further reading
 
-- [Profiling Go programs](http://blog.golang.org/profiling-go-programs) (Go Blog)
-- [Debugging performance issues in Go programs](https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs)
+- [Profiling Go programs][4] (Go Blog)
+- [Debugging performance issues in Go programs][5]
 
 ## CPU profiling (exercise)
 
@@ -153,7 +157,7 @@ func main() {
         fmt.Printf("%q: %d words\n", os.Args[1], words)
 }
 ```
-Let's see how many words there are in Herman Melville's classic [Moby Dick](https://www.gutenberg.org/ebooks/2701) (sourced from Project Gutenberg)
+Let's see how many words there are in Herman Melville's classic [Moby Dick][6] (sourced from Project Gutenberg)
 ```
 % time go run main.go moby.txt
 "moby.txt": 181275 words
@@ -171,13 +175,23 @@ real    0m0.012s
 user    0m0.009s
 sys     0m0.002s
 ```
-So the numbers aren't the same. `wc` is about 19% higher because what it considers a word is different to what my simple program does. That's not important--both programs take the whole file as input and 
+So the numbers aren't the same. `wc` is about 19% higher because what it considers a word is different to what my simple program does. That's not important--both programs take the whole file as input and in a single pass count the number of transitions from word to non word.
 
 Let's investigate why these programs have different run times using pprof.
 
 ### Add CPU profiling
 
-First, edit he 
+First, edit `main.go` and enable profiling
+```go
+        ...
+        "github.com/pkg/profile"
+)
+
+func main() {
+        defer profile.Start().Stop()
+        ...
+```
+Now when we run the program a `cpu.pprof` file is created.
 ```
 % go run main.go moby.txt
 2018/08/18 15:46:05 profile: cpu profiling enabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile309242028/cpu.pprof
@@ -251,3 +265,10 @@ If you don't have a piece of code that you are able to experiment on, you can us
 - Seven ways to profile a Go program (slides)[https://talks.godoc.org/github.com/davecheney/presentations/seven.slide]
 - Seven ways to profile a Go program(video, 30 mins)[https://www.youtube.com/watch?v=2h_NFBFrciI]
 - Seven ways to profile a Go program (webcast, 60 mins)[ https://www.bigmarker.com/remote-meetup-go/Seven-ways-to-profile-a-Go-program]
+
+[0]: https://github.com/pkg/profile
+[1]: https://github.com/google/pprof
+[2]: https://github.com/gperftools/gperftools
+[4]: http://blog.golang.org/profiling-go-programs
+[5]: https://software.intel.com/en-us/blogs/2014/05/10/debugging-performance-issues-in-go-programs
+[6]: https://www.gutenberg.org/ebooks/2701

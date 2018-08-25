@@ -42,7 +42,7 @@ The final section of the day will be an open session where you can experiment wi
 
 This isn't a lecture, it's a conversation. We'll have lots of breaks to ask questions.
 
-If you don't understand something, or think what you're hearing is incorrect, please ask.
+If you don't understand something, or think what you're hearing not correct, please ask.
 
 [0]: https://golang.org/dl/#go1.10.3
 [1]: https://graphviz.gitlab.io/download/#Windows

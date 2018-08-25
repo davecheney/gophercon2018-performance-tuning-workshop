@@ -6,15 +6,13 @@ import (
 	"log"
 	"os"
 	"unicode"
+
+	"github.com/pkg/profile"
 )
 
-func readbyte(r io.Reader) (rune, error) {
-	var buf [1]byte
-	_, err := r.Read(buf[:])
-	return rune(buf[0]), err
-}
-
 func main() {
+	defer profile.Start().Stop()
+
 	f, err := os.Open(os.Args[1])
 	if err != nil {
 		log.Fatalf("could not open file %q: %v", os.Args[1], err)
@@ -37,4 +35,10 @@ func main() {
 		inword = unicode.IsLetter(r)
 	}
 	fmt.Printf("%q: %d words\n", os.Args[1], words)
+}
+
+func readbyte(r io.Reader) (rune, error) {
+	var buf [1]byte
+	_, err := r.Read(buf[:])
+	return rune(buf[0]), err
 }
