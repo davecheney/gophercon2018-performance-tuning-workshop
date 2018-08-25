@@ -9,12 +9,6 @@ import (
 	"unicode"
 )
 
-func readbyte(r io.Reader) (rune, error) {
-	var buf [1]byte
-	_, err := r.Read(buf[:])
-	return rune(buf[0]), err
-}
-
 func main() {
 	f, err := os.Open(os.Args[1])
 	if err != nil {
@@ -39,4 +33,10 @@ func main() {
 		inword = unicode.IsLetter(r)
 	}
 	fmt.Printf("%q: %d words\n", os.Args[1], words)
+}
+
+func readbyte(r io.Reader) (rune, error) {
+	var buf [1]byte
+	_, err := r.Read(buf[:])
+	return rune(buf[0]), err
 }
