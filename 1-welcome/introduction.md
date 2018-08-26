@@ -150,21 +150,22 @@ Much of the improvement in performance in the last two decades has come from arc
 
 ### Out of order execution
 
-Out of order, also known as super scalar, execution is a way of extracting so called _Instruction level parallelism from the code the CPU is executing. Modern CPUs effectively do SSA at the hardware level to identify data dependencies between operations, and where possible run independent operations in parallel. 
+Out of order, also known as super scalar, execution is a way of extracting so called _Instruction level parallelism_ from the code the CPU is executing. Modern CPUs effectively do SSA at the hardware level to identify data dependencies between operations, and where possible run independent instructions in parallel. 
 
 However there is a limit to the amount of parallelism inherent in any piece of code. It's also tremendously power hungry. Most modern CPUs have settled on six execution units per core as there is an n squared cost of connecting each execution unit to all others at each stage of the pipeline.
 
 
 ### Speculative execution
 
-One of the problems with out of order execution is branches and memory loads. When a CPU reaches a branch
+Save the smallest micro controllers, all CPUs utilise an _instruction pipeline_ to overlap parts of in the instruction fetch/decode/execute/commit cycle.
 
-Super scalar execution, as we're all learning about through Spectre style vulnerabilities chooses 
+![CPU pipeline](https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Fivestagespipeline.png/800px-Fivestagespipeline.png)
 
-To avoid the stalls inherent with branches and loads
+The problem with an instruction pipeline is branch instructions. When a CPU reaches a branch it cannot look beyond the branch for additional instructions to execute. Speculative execution allows the CPU to "guess" which path the branch will take _while the branch instruction is still being processed!_ 
 
-(super-scalar) -- requires register renaming
-speculative execution -- huge power waste
+If the CPU predicts the branch correctly then it can keep its pipeline of instructions full. If the CPU fails to predict the correct branch then when it realises the mistake it must roll back any change that were made to its _architectural state_. As we're all learning about through Spectre style vulnerabilities, sometimes this rollback isn't as seamless as promised.
+
+Speculative execution can be very power hungry when branch prediction rates are low. If the branch is misprediction, not only must the CPU backtrace to the point of the misprediction, but the energy expended on the incorrect branch is wasted.
 
 Cliff Click has a [wonderful presentation][10] that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
 
