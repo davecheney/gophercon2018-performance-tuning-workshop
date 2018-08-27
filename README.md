@@ -25,7 +25,7 @@ Through the day we'll work from the small -- learning how to write benchmarks, t
 | 14:30 | [Tips and tricks (dfc)][7] |
 | 15:15 | Break (15 minutes) |
 | 15:30 | Exercises |
-| 16:45 | [Final Questions and conclusion][8] |
+| 16:45 | [Final Questions and wrap up][8] |
 | 17:00 | Close |
 
 
