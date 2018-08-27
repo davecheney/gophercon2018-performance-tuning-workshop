@@ -37,7 +37,7 @@ This repository is licensed under the [Creative Commons Attribution-ShareAlike 4
 [1]: 1-welcome/1-welcome.md
 [2]: 2-benchmarking/benchmarking.md
 [3]: 3-profiling/1-profiling.md
-[4]: 4-compiler-optimisation/1-compiler-optimisation.md
+[4]: 4-compiler-optimisations/1-compiler-optimisation.md
 [5]: 5-execution-tracer/1-execution-tracer.md
 [6]: 6-memory-management/1-memory-management.md
 [7]: 7-tips-and-tricks/1-tips-and-tricks.md

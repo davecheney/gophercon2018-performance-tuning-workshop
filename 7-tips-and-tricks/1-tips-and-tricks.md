@@ -79,6 +79,8 @@ r = string(b)
 % go test -bench=. ./examples/concat/
 ```
 
+_Bonus question_: All four benchmarks got _slower_ from Go 1.10 to Go 1.11 _on this Mac_. Any ideas why?
+
 ## Preallocate slices if the length is known
 
 Append is convenient, but wasteful.
