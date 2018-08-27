@@ -216,4 +216,4 @@ Try to find other cool modifications that change the trace.
 
 ## Congratulations
 
-Now let's talk about memory management in the [next chapter](../6-memory-management/1-memory-management.md).
+Now let's talk about memory management in the [next chapter](../6-tips-and-tricks/1-tips-and-tricks.md).
