@@ -231,12 +231,43 @@ func BenchmarkRead(b *testing.B) {
         }
 }
 ```
-Here is an example funning
-DEMO: `go`test`-run=^$`-bench=.`bufio`
+Here is an example using the `bufio` package's benchmarks.
+```
+% go test -run=^$ -bench=. bufio
+goos: darwin
+goarch: amd64
+pkg: bufio
+BenchmarkReaderCopyOptimal-8            20000000               103 ns/op
+BenchmarkReaderCopyUnoptimal-8          10000000               159 ns/op
+BenchmarkReaderCopyNoWriteTo-8            500000              3644 ns/op
+BenchmarkReaderWriteToOptimal-8          5000000               344 ns/op
+BenchmarkWriterCopyOptimal-8            20000000                98.6 ns/op
+BenchmarkWriterCopyUnoptimal-8          10000000               131 ns/op
+BenchmarkWriterCopyNoReadFrom-8           300000              3955 ns/op
+BenchmarkReaderEmpty-8                   2000000               789 ns/op            4224 B/op          3 allocs/op
+BenchmarkWriterEmpty-8                   2000000               683 ns/op            4096 B/op          1 allocs/op
+BenchmarkWriterFlush-8                  100000000               17.0 ns/op             0 B/op          0 allocs/op
+```
 
-_Note:_ you can also use the `go`test`-benchmem` flag to do the same for _all_ benchmarks.
-
-DEMO: `go`test`-run=^$`-bench=.`-benchmem`bufio`
+_Note:_ you can also use the `go test -benchmem` flag to  the same for _all_ benchmarks.
+```
+% go test -run=^$ -bench=. -benchmem bufio
+goos: darwin
+goarch: amd64
+pkg: bufio
+BenchmarkReaderCopyOptimal-8            20000000                93.5 ns/op            16 B/op          1 allocs/op
+BenchmarkReaderCopyUnoptimal-8          10000000               155 ns/op              32 B/op          2 allocs/op
+BenchmarkReaderCopyNoWriteTo-8            500000              3238 ns/op           32800 B/op          3 allocs/op
+BenchmarkReaderWriteToOptimal-8          5000000               335 ns/op              16 B/op          1 allocs/op
+BenchmarkWriterCopyOptimal-8            20000000                96.7 ns/op            16 B/op          1 allocs/op
+BenchmarkWriterCopyUnoptimal-8          10000000               124 ns/op              32 B/op          2 allocs/op
+BenchmarkWriterCopyNoReadFrom-8           500000              3219 ns/op           32800 B/op          3 allocs/op
+BenchmarkReaderEmpty-8                   2000000               748 ns/op            4224 B/op          3 allocs/op
+BenchmarkWriterEmpty-8                   2000000               662 ns/op            4096 B/op          1 allocs/op
+BenchmarkWriterFlush-8                  100000000               16.9 ns/op             0 B/op          0 allocs/op
+PASS
+ok      bufio   20.366s
+```
 
 ### Watch out for compiler optimisations
 
