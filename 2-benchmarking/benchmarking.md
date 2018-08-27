@@ -341,6 +341,8 @@ Because `Result` is public the compiler cannot prove that another package import
 
 _Exercise_: What happens if we assign to `Result` directly? Does this affect the benchmark time?
 
+_Question_: In our earlier `Fib` benchmark we didn't take these precautions, should we have done so?
+
 ## Benchmark mistakes
 
 The `for` loop is crucial to the operation of the benchmark.
@@ -360,6 +362,7 @@ func BenchmarkFibWrong2(b *testing.B) {
         }
 }
 ```
+_Exercise_: Run these benchmarks, what do you see?
 
 ## Profiling benchmarks
 
