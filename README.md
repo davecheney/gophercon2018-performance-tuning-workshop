@@ -22,10 +22,9 @@ Through the day we'll work from the small -- learning how to write benchmarks, t
 | 11:15 | [Profiling (dfc)][4] |
 | 12:00 | Lunch (90 minutes) |
 | 13:30 | [Execution tracer (francesc)][5] |
-| 14:30 | [Memory and Garbage collection (francesc)][6] |
+| 14:30 | [Tips and tricks (dfc)][7] |
 | 15:15 | Break (15 minutes) |
-| 15:30 | [Tips and tricks (dfc)][7] |
-| 16:00 | Exercises |
+| 15:30 | Exercises |
 | 16:45 | [Final Questions and conclusion][8] |
 | 17:00 | Close |
 
