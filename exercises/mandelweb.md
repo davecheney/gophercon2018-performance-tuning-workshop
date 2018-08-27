@@ -1,6 +1,6 @@
 # Mandelbrot microservice
 
-It's 2018, generating Mandelbrots is pointless unless you can offer them on the internet as a web sevice.
+It's 2018, generating Mandelbrots is pointless unless you can offer them on the internet as a web service.
 
 Thus, I present to you, _Mandelweb_
 

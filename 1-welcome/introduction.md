@@ -32,9 +32,9 @@ But this is all changing.
 
 ## Are computers still getting faster?
 
-So the fundamental question is, confronted with statistic like the ones on the slide page, we should ask the question _are computers still getting faster_?
+So the fundamental question is, confronted with statistic like the ones in the image above, should we ask the question _are computers still getting faster_?
 
-If computers are still getting faster then maybe we don’t need to care about the performance of our code, we just wait a bit and the hardware manufacturers will solve our performance problems.
+If computers are still getting faster then maybe we don’t need to care about the performance of our code, we just wait a bit and the hardware manufacturers will solve our performance problems for us.
 
 ### Let's look at the data
 
@@ -42,10 +42,10 @@ This is the classic data you’ll find in textbooks like *Computer Architecture,
 
 ![graph](images/graph.png)
 
-Hennessey and Patterson argue that there are three eras
+In the 5th edition, Hennessey and Patterson argue that there are three eras of computing performance
 
-- The first was the 1970’s and 80’s which were really formative years, microprocessors as we know them today didn’t really exist, computers were built from discrete transistors or small scale integrated circuits. Cost, size, and the limitations in understanding material science were the limiting factor.
-- From the mid 80s to 2004 the trend line is clear. Computer integer performance improved by 52% each year. Computer power doubled every two years, hence people conflated Moore’s law — the doubling of the number of transistors on a die, with computer performance.
+- The first was the 1970’s and early 80’s which was the formative years. Microprocessors as we know them today didn’t really exist, computers were built from discrete transistors or small scale integrated circuits. Cost, size, and the limitations in the understanding of material science were the limiting factor.
+- From the mid 80s to 2004 the trend line is clear. Computer integer performance improved on average by 52% each year. Computer power doubled every two years, hence people conflated Moore’s law — the doubling of the number of transistors on a die, with computer performance.
 - Then we come to the third era of computer performance. Things slow down. The aggregate rate of change is 22% per year. 
 
 That previous graph only went up to 2012, but fortunately in 2012 [Jeff Preshing][0] wrote a [tool to scrape the Spec website and build your own graph][1].
@@ -108,8 +108,6 @@ We now know that CPU feature size reductions are primarily aimed at reducing pow
 
 But, there is one part of the graph that is continuing to increase, the number of transistors on a die. The march of cpu features size, more transistors in the same given area, has both positive and negative effects.
 
-
-
 Also, as you can see in the insert, the cost per transistor continued to fall until around 5 years ago, and then the cost per transistor started to go back up again.
 
 ![gate-length](images/gate-length.png)
@@ -119,8 +117,6 @@ Not only is it getting more expensive to create smaller transistors, it’s gett
 It is costing intel, TSMC, AMD, and Samsung billions of dollars because they have to build new fabs, buy all new process tooling. So while the number of transistors per die continues to increase, their unit cost has started to increase.
 
 _note_: Even the term gate length, measured in nano meters, has become ambiguous. Various manufacturers measure the size of their transistors in different ways allowing them to demonstrate a smaller number than their competitors without perhaps delivering. This is the Non-GAAP Earning reporting model of CPU manufacturers.
-
-https://spectrum.ieee.org/semiconductors/devices/transistors-could-stop-shrinking-in-2021
 
 ## More cores
 
@@ -134,7 +130,7 @@ In truth, the core count of a CPU is dominated by heat dissipation. The end of D
 
 CPUs are not getting faster, but they are getting wider with hyper threading and multiple cores. Dual core on mobile parts, quad core on desktop parts, dozens of cores on server parts. Will this be the future of computer performance? Unfortunately not.
 
-Amdahl's law, named after the Gene Amdahl is a formula which gives the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved.
+Amdahl's law, named after the Gene Amdahl the designer of the IBM/360, is a formula which gives the theoretical speedup in latency of the execution of a task at fixed workload that can be expected of a system whose resources are improved.
 
 ![AmdahlsLaw](images/AmdahlsLaw.svg)
 
@@ -161,21 +157,21 @@ Save the smallest micro controllers, all CPUs utilise an _instruction pipeline_ 
 
 ![CPU pipeline](https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Fivestagespipeline.png/800px-Fivestagespipeline.png)
 
-The problem with an instruction pipeline is branch instructions. When a CPU reaches a branch it cannot look beyond the branch for additional instructions to execute. Speculative execution allows the CPU to "guess" which path the branch will take _while the branch instruction is still being processed!_ 
+The problem with an instruction pipeline is branch instructions, which occur every 5-8 instructions on average. When a CPU reaches a branch it cannot look beyond the branch for additional instructions to execute and it cannot start filling its pipeline until it knows where the program counter will branch too. Speculative execution allows the CPU to "guess" which path the branch will take _while the branch instruction is still being processed!_ 
 
-If the CPU predicts the branch correctly then it can keep its pipeline of instructions full. If the CPU fails to predict the correct branch then when it realises the mistake it must roll back any change that were made to its _architectural state_. As we're all learning about through Spectre style vulnerabilities, sometimes this rollback isn't as seamless as promised.
+If the CPU predicts the branch correctly then it can keep its pipeline of instructions full. If the CPU fails to predict the correct branch then when it realises the mistake it must roll back any change that were made to its _architectural state_. As we're all learning through Spectre style vulnerabilities, sometimes this rollback isn't as seamless as promised.
 
 Speculative execution can be very power hungry when branch prediction rates are low. If the branch is misprediction, not only must the CPU backtrace to the point of the misprediction, but the energy expended on the incorrect branch is wasted.
 
-Cliff Click has a [wonderful presentation][10] that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
-
 All these optimisations lead to the improvements in single threaded performance we've seen, at the cost of huge numbers of transistors and power.
+
+_Note_: Cliff Click has a [wonderful presentation][10] that argues out of order and speculative execution is most useful for starting cache misses early thereby reducing observed cache latency.
 
 ## Modern CPUs are optimised for bulk operations
 
-> Modern processors are a like nitro fuelled funny cars, they excel at the quarter mile. Unfortunately modern programming languages are like Monte Carlo, they are full of twists and turns. -- 
+> Modern processors are a like nitro fuelled funny cars, they excel at the quarter mile. Unfortunately modern programming languages are like Monte Carlo, they are full of twists and turns. -- David Ungar
 
-This a quote from David Ungar, an influential computer scientist and the developer of the SELF programming language that I found online in some very old
+This a quote from David Ungar, an influential computer scientist and the developer of the SELF programming language that was referenced In a very old presentation I found online.
 
 Thus, modern CPUs are optimised for bulk transfers and bulk operations. At every level, the setup cost of an operation encourages you to work in bulk. Some examples include
 
@@ -202,7 +198,9 @@ So, most modern processors are limited by memory latency not capacity.
 
 ![memory-latency](images/memory-latency.png)
 
-For decades CPUs have a cache, a piece of small fast memory located closer, and now directly integrated onto, the CPU. 
+For decades the solution to the processor/memory cap was to add a cache-- a piece of small fast memory located closer, and now directly integrated onto, the CPU. 
+
+But;
 
 - L1 has been stuck at 32kb per core for decades
 - L2 has slowly crept up to 512kb on the largest intel parts
@@ -214,7 +212,7 @@ By caches are limited in size because they are [physically large on the CPU die]
 
 ## The free lunch is over
 
-In 2005 Herb Sutter, the C++ committee leader, wrote an article entitled [The free lunch is over][5]. In his article Sutter discussed all the points I covered and asserted that programmers could no longer rely on faster hardware to fix slow programs—or slow programming languages.
+In 2005 Herb Sutter, the C++ committee leader, wrote an article entitled [The free lunch is over][5]. In his article Sutter discussed all the points I covered and asserted that future programmers will not longer be able to rely on faster hardware to fix slow programs—or slow programming languages.
 
 Now, more than a decade later, there is no doubt that Herb Sutter was right. Memory is slow, caches are too small, CPU clock speeds are going backwards, and the simple world of a single threaded CPU is long gone.
 
@@ -224,13 +222,13 @@ Moore's Law is still in effect, but for all of us in this room, the free lunch i
 
 > The numbers I would cite would be by 2010: 30GHz, 10billion transistors, and 1 tera-instruction per second.-- [Pat Gelsinger, Intel CTO, April 2002][12]
 
-It's clear that without a breakthrough in material science the likelihood of a return to the days of 52% year on year growth in CPU performances is diminishingly small. The common consensus is that the fault lies not with the material science itself, but how the transistors are being used. The logical model of sequential instruction flow as expressed in silicon has lead to this expensive endgame. 
+It's clear that without a breakthrough in material science the likelihood of a return to the days of 52% year on year growth in CPU performance is vanishingly small. The common consensus is that the fault lies not with the material science itself, but how the transistors are being used. The logical model of sequential instruction flow as expressed in silicon has lead to this expensive endgame. 
 
-There are many presentations online that rehash this material. They all have the same prediction -- computers in the future will not be programmed like they are today. Some argue it'll look more like graphics cards with hundreds of very dumb, very incoherent processors. Others argue that Very Long Instruction Word (VLIW) computers will become predominant. All agree that our current sequential programming languages will not be compatible with these kinds of processors.
+There are many presentations online that rehash this point. They all have the same prediction -- computers in the future will not be programmed like they are today. Some argue it'll look more like graphics cards with hundreds of very dumb, very incoherent processors. Others argue that Very Long Instruction Word (VLIW) computers will become predominant. All agree that our current sequential programming languages will not be compatible with these kinds of processors.
 
 My view is that these predictions are right, the outlook for hardware manufacturers saving us at this point is grim. However, there is _enormous_ scope to optimise the programs today we write for the hardware we have today. Rick Hudson spoke at GopherCon 2015 about [re engaging with a "virtuous cycle"][8] of software that works _with_ the hardware we have today, not indiferent of it.
 
-Over from 2015 to 2018 looking at the graphs I showed earlier, with at best a 5-8% improvement in integer performance and less than that in memory latency, the Go team decreased the garbage collector pause by [two orders of magnitude][11].
+Looking at the graphs I showed earlier, from 2015 to 2018 with at best a 5-8% improvement in integer performance and less than that in memory latency, the Go team have decreased the garbage collector pause times by [two orders of magnitude][11]. None of this came from hardware, a Go 1.11 program exhibits significantly better GC latency than the same program on the same hardware using Go 1.6.
 
 So, for best performance on today's hardware in today's world, you need a programming language which:
 
