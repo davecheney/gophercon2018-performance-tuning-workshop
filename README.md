@@ -18,8 +18,8 @@ Through the day we'll work from the small -- learning how to write benchmarks, t
 | 09:00 | [Welcome and introduction][1] |
 | 09:30 | [Benchmarking (dfc)][2] |
 | 10:15 | Break (15 minutes) |
-| 10:30 | [Profiling (dfc)][3] |
-| 11:15 | [Compiler optimization (dfc)][4]|
+| 10:30 | [Compiler optimisation (dfc)][3]|
+| 11:15 | [Profiling (dfc)][4] |
 | 12:00 | Lunch (90 minutes) |
 | 13:30 | [Execution tracer (francesc)][5] |
 | 14:30 | [Memory and Garbage collection (francesc)][6] |
@@ -36,8 +36,8 @@ This repository is licensed under the [Creative Commons Attribution-ShareAlike 4
 
 [1]: 1-welcome/1-welcome.md
 [2]: 2-benchmarking/benchmarking.md
-[3]: 3-profiling/1-profiling.md
-[4]: 4-compiler-optimisations/1-compiler-optimisations.md
+[3]: 3-compiler-optimisations/1-compiler-optimisations.md
+[4]: 4-profiling/1-profiling.md
 [5]: 5-execution-tracer/1-execution-tracer.md
 [6]: 6-memory-management/1-memory-management.md
 [7]: 7-tips-and-tricks/1-tips-and-tricks.md
