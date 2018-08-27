@@ -19,14 +19,14 @@ This repo is on [bit.ly/goptw2018](http://bit.ly/goptw2018) (goptw2018 = gopherc
 | --- | --- |
 | 09:00 | [Welcome and introduction][1] |
 | 09:30 | [Benchmarking (dfc)][2] |
-| 10:15 | Break (15 minutes) |
-| 10:30 | [Compiler optimisation (dfc)][3]|
-| 11:15 | [Profiling (francesc)][4] 
+| 10:45 | Break (15 minutes) |
+| 11:00 | [Profiling (francesc)][4] 
 | 12:00 | Lunch (90 minutes) | 
 | 13:30 | [Execution tracer (francesc)][5] |
-| 14:30 | [Tips and tricks (dfc)][6] |
+| 14:30 | [Compiler optimisation (dfc)][3]|
 | 15:15 | Break (15 minutes) |
-| 15:30 | Exercises |
+| 15:30 | [Tips and tricks (dfc)][6] |
+| 16:00 | Exercises |
 | 16:45 | [Final Questions and conclusion][7] |
 | 17:00 | Close |
 
