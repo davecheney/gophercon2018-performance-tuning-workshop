@@ -6,7 +6,7 @@ To summarise the advice from today
 
 Start with the simplest possible code.
 
-_Measure_. Profile your code to identify the bottlenecks, _do_not_guess_.
+_Measure_. Profile your code to identify the bottlenecks, _don't guess_.
 
 If performance is good, _stop_. You don't need to optimise everything, only the hottest parts of your code.
 
@@ -30,19 +30,19 @@ Shorter code is _smaller_ code; which is important for the CPU's cache.
 
 > If a program is too slow, it must have a loop -- Ken Thompson
 
-Most programs perform well with small amounts of data.
+Most programs perform well with small amounts of data. This is the essence behind [Pike's 3rd rule][0]. 
 
-I'm a big fan of metrics, rather than testing with 
+However when the data set is large anything that touches the input set more than once, ie for every element in the set, test it against every other element in the set, has the potential to be a large performance headache.
 
-Limit the communication and points of co-ordination between the parts of your program to ride Ahmdawls law.
+Limit the communication and points of co-ordination between the parts of your program to ride Amdahl's law.
 
-## Performance rule of thumb:
+## Performance rule of thumb
 
 Network/disk io >> allocations >> function calls
 
-If your program is dominated by network or disk access, don’t bother optimising allocations. 
+If your program is dominated by network or disk access, don’t bother optimising allocations. Work on buffering and batching to reduce the amont of time spent waiting for io.
 
-If your program is allocation bound, don’t bother optimising functions for inlining, loop unrolling, etc.
+If your program is allocation bound, don’t bother optimising functions for inlining, loop unrolling, etc. 
 
 Pay very close attention to allocations, avoid unnecessary allocation where possible.
 
@@ -55,3 +55,7 @@ Finally, don't trade performance for reliability.
 > Readable means reliable -- Rob Pike
 
 Performance and reliability are equally important. I see little value in making a very fast server that panics, deadlocks or OOMs on a regular basis.
+
+## Thank you
+
+[0]: https://users.ece.utexas.edu/~adnan/pike.html
