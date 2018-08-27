@@ -278,7 +278,7 @@ Then run the program as usual
 2018/08/25 14:41:15 profile: memory profiling disabled, /var/folders/by/3gf34_z95zg05cyj744_vhx40000gn/T/profile312088211/mem.pprof
 ```
 
-![memprof](/Users/dfc/devel/gophercon2018-performance-tuning-workshop/3-profiling/images/memprof.png)
+![memprof](images/memprof.png)
 
 As we suspected the allocation was coming from `readbyte` -- this wasn't that complicated, readbyte is three lines long:
 ```go
