@@ -27,7 +27,7 @@ However, a goroutine's stack exists as a cheap place to store local variables; t
 In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer--heap allocations are made with `malloc` and `free`, stack allocation is via `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
 
 In Go, the compiler automatically moves a value to the heap if if lives beyond the lifetime of the function call. It is said that the value  _escapes_ to the heap.
-```
+```go
 type Foo struct {
 	a, b, c, d int
 }
@@ -235,15 +235,9 @@ Adjusting the _inlining level_ is performed with the `-gcflags=-l` flag. Somewha
 
 ### Inlining future (Go 1.12)
 
-We're using Go 1.10 for this workshop. A bunch of work happened under the hood for 1.11, but the rules around what is inlined and when have not changed substantively with one exception
+We're using Go 1.10 for this workshop. A bunch of work happened under the hood for 1.11, but the rules around what is inlined and when have not changed substantively with one exception, mid stack inlining. 
 
-A lot of what we've discussed with respect to leaf functions _may_ change in a future release of Go.
-
-There has been work going on in the background since Go 1.8 to enable, so called, mid-stack inlining.
-
-As a Go programmer, this should not be a cause for alarm, mid-
-
-.link https://github.com/golang/proposal/blob/master/design/19348-midstack-inlining.md Proposal: Mid-stack inlining in the Go compiler
+Mid stack inlining is not enabled by default, even in Go 1.11 or tip, but at some point it will be. A lot of what we've discussed with respect to leaf functions _may_ change in a future release of Go.
 
 ## Dead code elimination
 

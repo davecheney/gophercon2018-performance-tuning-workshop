@@ -1,6 +1,6 @@
 # Tips and Tricks
 
-This final section contains a number of tips to optimise Go code.
+This section contains a number of tips to optimise Go code.
 
 ## Reduce allocations
 
@@ -141,6 +141,10 @@ In your design, some goroutines may run until the program exits. These goroutine
 
 **Never start a goroutine without knowing how it will stop**
 
+A good way to achieve this is to use something like [run.Group][4], [workgroup.Group][5], or similar.
+
+Peter Bourgon has a great presentation on the design behing run.Group from GopherCon EU
+
 ### Further reading
 
 - [Concurrency Made Easy][0] (video)
@@ -206,13 +210,13 @@ defer func() {
 	mu.Unlock()
 }()
 ```
-`defer` is expensive if the work being done is small, the classic example is `defer` ing a mutex unlock around a struct variable or map lookup. You may choose to avoid `defer` in those situations.
+`defer` can be expensive if the work being done is small, the classic example is `defer` ing a mutex unlock around a struct variable or map lookup. You may choose to avoid `defer` in those situations.
 
 This is a case where readability and maintenance is sacrificed for a performance win. 
 
 #### Always revisit these decisions.
 
-.link https://github.com/golang/go/issues/9704#issuecomment-251003577
+However, in revising this presentation, I have not been able to write a program that demonstrates a measurable cost from using `defer` -- the compiler is getting very good at eliminating the cost of using defer.
 
 ## Avoid Finalisers
 
@@ -260,11 +264,9 @@ Old versions of Go will never get better. They will never get bug fixes or optim
 - Go 1.5 and 1.6 had a slower compiler, but it produces faster code, and has a faster GC.
 - Go 1.7 delivered roughly a 30% improvement in compilation speed over 1.6, a 2x improvement in linking speed (better than any previous version of Go).
 - Go 1.8 will deliver a smaller improvement in compilation speed (at this point), but a significant improvement in code quality for non Intel architectures.
+- Go 1.9, 1.10, 1.11 continue to drive down the GC pause time and improve the quality of generated code.
 
 Old version of Go receive no updates. Do not use them. Use the latest and you will get the best performance.
-
-.link http://dave.cheney.net/2016/04/02/go-1-7-toolchain-improvements Go 1.7 toolchain improvements
-.link http://dave.cheney.net/2016/09/18/go-1-8-performance-improvements-one-month-in Go 1.8 performance improvements
 
 ## Discussion
 
@@ -274,3 +276,5 @@ Any questions?
 [1]: https://dave.cheney.net/paste/concurrency-made-easy.pdf
 [2]: https://golang.org/pkg/bytes
 [3]: https://golang.org/pkg/strings
+[4]: https://github.com/oklog/run
+[5]: https://github.com/heptio/workgroup
