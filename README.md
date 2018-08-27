@@ -13,6 +13,8 @@ Through the day we'll work from the small -- learning how to write benchmarks, t
 
 ## Schedule (approximate)
 
+This repo is on [bit.ly/goptw2018](http://bit.ly/goptw2018) (goptw2018 = gophercon performance tuning workshop 2018).
+
 | Start | Description |
 | --- | --- |
 | 09:00 | [Welcome and introduction][1] |

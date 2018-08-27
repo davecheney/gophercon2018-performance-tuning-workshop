@@ -4,11 +4,13 @@ Hello and welcome! :tada:
 
 The goal for this workshop is to give you the tools you need to diagnose performance problems in your Go applications and fix them.
 
-Through the day we'll work from the small -- learning how to write benchmarks, then profiling a small piece of code. Then step out and talk about the execution tracer, the garbage collector  and tracing running applications. The remainder of the day will be a chance for you to ask questions, experiement with your own code.
+Through the day we'll work from the small -- learning how to write benchmarks, then profiling a small piece of code. Then step out and talk about the execution tracer, the garbage collector  and tracing running applications. The remainder of the day will be a chance for you to ask questions, experiment with your own code.
 
 ## Prerequisites
 
-The are several software downloads you will need today. 
+The are several software downloads you will need today.
+
+Download this repo on [bit.ly/goptw2018](http://bit.ly/goptw2018).
 
 ### Laptop, power supplies, etc.
 
