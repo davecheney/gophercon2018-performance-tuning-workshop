@@ -26,7 +26,7 @@ However, a goroutine's stack exists as a cheap place to store local variables; t
 
 In some languages, for example C and C++, the choice of allocating on the stack or on the heap is a manual exercise for the programmer--heap allocations are made with `malloc` and `free`, stack allocation is via `alloca`. Mistakes using these mechanisms are a common cause of memory corruption bugs.
 
-In Go, the compiler automatically moves a value to the heap if if lives beyond the lifetime of the function call. It is said that the value  _escapes_ to the heap.
+In Go, the compiler automatically moves a value to the heap if it lives beyond the lifetime of the function call. It is said that the value  _escapes_ to the heap.
 ```go
 type Foo struct {
 	a, b, c, d int
