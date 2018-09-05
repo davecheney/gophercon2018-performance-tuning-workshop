@@ -353,7 +353,7 @@ Investigate the operation of the following compiler functions:
 - `-S` prints the (Go flavoured) assembly of the _package_ being compiled.
 - `-l` controls the behaviour of the inliner; `-l` disables inlining, `-l -l` increases it (more `-l` 's increases the compiler's appetite for inlining code). Experiment with the difference in compile time, program size, and run time.
 - `-m` controls printing of optimisation decision like inlining, escape analysis. `-m`-m` prints more details about what the compiler was thinking.
-- `-N` disables all optimisations.
+- `-l -N` disables all optimisations.
 
 _Note_: If you find that subsequent runs of `go build ...` produce no output, delete the `./max` binary in your working directory.
 
