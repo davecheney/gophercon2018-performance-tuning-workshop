@@ -37,7 +37,7 @@ func BenchmarkFib20(b *testing.B) {
         }
 }
 ```
-Benchmarks are similar to tests. The only real difference is they take a `*testing.B` rather than a `*testing.T`. Both of these types implement the `testing.TB` interface which provides crowd favorites like `Errorf()`, `Fatalf()`, and `FailNow()`
+Benchmarks are similar to tests. The only real difference is they take a `*testing.B` rather than a `*testing.T`. Both of these types implement the `testing.TB` interface which provides crowd favorites like `Errorf()`, `Fatalf()`, and `FailNow()`.
 
 ### Running a package's benchmarks
 
