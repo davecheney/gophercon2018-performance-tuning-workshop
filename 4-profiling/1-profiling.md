@@ -13,7 +13,7 @@ The first tool we're going to be talking about today is _pprof_. [pprof][1] desc
 `pprof`  consists of two parts:
 
 - `runtime/pprof` package built into every Go program
-- `go`tool`pprof` for investigating profiles.
+- `go tool pprof` for investigating profiles.
 
 pprof supports several types of profiling, we'll discuss three of these today: 
 
