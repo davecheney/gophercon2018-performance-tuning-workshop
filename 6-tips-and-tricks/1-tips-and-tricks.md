@@ -254,7 +254,7 @@ For best performance I recommend avoiding cgo in your applications.
 
 Is there anyone who's using cgo to call expensive C code frequently?
 
-.link http://dave.cheney.net/2016/01/18/cgo-is-not-go Further reading: cgo is not Go.
+Further reading: [cgo is not Go](http://dave.cheney.net/2016/01/18/cgo-is-not-go).
 
 ## Always use the latest released version of Go
 
